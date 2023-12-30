@@ -26,11 +26,11 @@ void createBlock(blockP S) {
 
 
 
-void openLOF(LOF_fileP f, char file_name[20], char open_mode) {
+void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
     f = malloc(sizeof(LOF_file));
     if (open_mode == 'r') {  // On ouvre le fichier en mode lecture (le fichier existe deja)
         f->file = fopen(file_name, "rb");
-        fread(f->header, sizeof(header), 1, f->file);
+        fread(&(f->header), sizeof(header), 1, f->file);
         return;
     }
     if (open_mode == 'w') {  // On ouvre le fichier en mode ecriture (le fichier existe pas, on le cree et on initialise l'entete)
@@ -40,38 +40,58 @@ void openLOF(LOF_fileP f, char file_name[20], char open_mode) {
         f->header->lastBlock = 0;
         f->header->nbBlocks = 0;
         f->header->nbStudents = 0;
-        fwrite(f->header, sizeof(header), 1, f->file);
+        fwrite(&(f->header), sizeof(header), 1, f->file);
         return;
     }
 }//ouvrir le fichier logique
 
-void closeLOF(LOF_fileP f, char file_name[20]) {
+void closeLOF(LOF_fileP f, char file_name[20]){
+    rewind(f->file); // position le curseur au debut de fichier 
+    fwrite(&(f->header),sizeof(header),1,f->file); 
+    fclose(f->file);// la fermeture du fichier
 
-}//fermer le fichier logique
+}  //fermer le fichier logique
 
 void writeHeader(LOF_fileP f, int K, int val) {
     switch (K)
     {
         case 1:
             f->header->firstBlock = val;
-        break;
+            break;
         case 2:
             f->header->lastBlock = val;
-        break;
+            break;
         case 3:
             f->header->nbBlocks = val;
-        break;
+            break;
         case 4:
             f->header->nbStudents = val;
-        break;
+            break;
         default:
-            printf("Error in writing header, you choosed a wrong number\n");
-        break;
+            printf("Error in writing header, you chose a wrong number\n");
+            break;
     }
 }//affecter la valeur val au K ème champ de l'entete
 
 int readHeader(LOF_fileP f, int K) {
-
+    int val;
+    switch (k)
+    {
+    case 1:
+        val = f->header->firstBlock;
+        break;
+    case 2:
+        val = f->header->lasBlock;
+        break;
+    case 3:
+        val = f->header->nbBlocks;
+        break;
+    case 4:
+        val = f->header->nbStudents;
+    default:
+        printf("reading error, pick a valid number (1-4).\n")
+        break;
+    }
 }  //retourner le contenue du K ème champ de l'entete
 
 void printHeader(LOF_fileP f, char file_name[20]) {
@@ -79,7 +99,9 @@ void printHeader(LOF_fileP f, char file_name[20]) {
 }  //afficher le contenue de l'entete
 
 void writeBlock(LOF_fileP f, int K, blockP buffer) {
-
+    fseek(f->file,sizeof(header)+((K-1)*sizeof(blockP)),SEEK_SET);
+    fwrite(buffer,sizeof(blockP),1,f->file);
+    rewind(f->file); // on se repositionne au debut de fichier 
 }  //mettre le contenue du tampon dans le bloc numero K
 
 void readBlock(LOF_fileP f, int K, blockP buffer) {
