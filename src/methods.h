@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_E 20 // nombre maximum d'enregistrement dans un bloc
+#define MAX_E 10 // nombre maximum d'enregistrement dans un bloc
 #define LoadFact 0.6    // facteur de chargement
 
 // declaration de l'enregistrement logique
@@ -78,6 +78,7 @@ void InitialLoading(char file_name[20]);    //fonction de chargement initial car
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
+void createLOF(LOF_fileP f, char file_name[20], int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void DeleteStudent(LOF_fileP f, char file_name[20], int matricule); //suppression de l'enregistrement si il existe
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
