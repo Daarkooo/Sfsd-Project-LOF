@@ -6,22 +6,45 @@
 
 void printStudent(StudentP S) {
 
+    printf("Name : %s", S->name);
+    printf("Surname : %s", S->surname);
+    printf("Matricule : %d \n\n" , S->matricule );
+
 }
 
 void createStudent(StudentP S) {
-
+    char ch[5];
+    fgets(ch, sizeof(ch), stdin);
+    printf("Name : ");
+    rewind(stdin);
+    fgets(S->name, sizeof(S->name), stdin);
+    printf("Surname : ");
+    rewind(stdin);  //reinitialiser le tampon stdin
+    fgets(S->surname, sizeof(S->surname), stdin); //fgets accepte les espaces
+    printf("Matricule : ");
+    scanf("%d", &S->matricule);
+    S->deleted=0;
 }
 
-
 void printBlock(blockP S) {
-
-} // afficher un etudiant
+    printf("\n\t-----Student Information-----\t\n");
+    for (int i = 0; i < S->NB; i++) {
+        printf("Student %d: \n", i + 1);
+        printStudent((S->tab) + i);//afficher les information de le i eme etudiant
+    }
+    
+} // afficher un block
 
 void createBlock(blockP S) {
+    printf("enter the numbre of students in this block : ");
+    scanf("%d",&S->NB);
+    printf("\n");
+    for(int i=0 ; i<(S->NB) ; i++){
+        printf("enter information for student numbre %d : \n",i+1);
+        createStudent((S->tab) + i);
+    }
 
-
-} // lire les informations d'un etudiant
-
+}
 
 
 void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
@@ -91,19 +114,47 @@ int readHeader(LOF_fileP f, int K) {
     }
 }  //retourner le contenue du K ème champ de l'entete
 
-void printHeader(LOF_fileP f, char file_name[20]) {
+void printHeader(LOF_fileP f, char file_name[20]){
+ // Ouvrir le fichier 
+    f->file = fopen(file_name, "rb");
 
-}  //afficher le contenue de l'entete
+    // Verification d'ouverture du fichier 
+    if (f->file == NULL) {
+        perror("Erreur lors de l'ouverture du fichier");
+        return;
+    }
+
+    // Lire l'entête à partir du fichier
+    fread(f->header, sizeof(header), 1, f->file);
+
+    fclose(f->file);
+
+    // Afficher le contenu de l'entête
+    printf("First Block: %d\n", f->header->firstBlock);
+    printf("Last Block: %d\n", f->header->lastBlock);
+    printf("Number of Blocks: %d\n", f->header->nbBlocks);
+    printf("Number of Students: %d\n", f->header->nbStudents);
+};  //afficher le contenue de l'entete
 
 void writeBlock(LOF_fileP f, int K, blockP buffer) {
-    fseek(f->file,sizeof(header)+((K - 1)*sizeof(blockP)),SEEK_SET);
+    fseek(f->file,sizeof(header)+((K-1)*sizeof(blockP)),SEEK_SET);
     fwrite(buffer,sizeof(blockP),1,f->file);
     rewind(f->file); // on se repositionne au debut de fichier 
 }  //mettre le contenue du tampon dans le bloc numero K
 
-void readBlock(LOF_fileP f, int K, blockP buffer) {
+void readBlock(LOF_fileP f, int K, blockP buffer){
 
-}  //mettre le contenue du bloc numero K dans le tampon
+    // Calculer la position du bloc dans le fichier 
+    long position = sizeof(header) + (K-1) * sizeof(block);
+
+    // Se deplacer a la position du bloc dans le fichier
+    fseek(f->file, position, SEEK_SET);
+
+    // Lire le contenu du bloc dans le tampon
+    fread(buffer, sizeof(block), 1, f->file);
+
+};  //mettre le contenue du bloc numero K dans le tampon
+
 
 void allocBlock(LOF_fileP f, int* K, blockP buffer) {
     buffer->NB = 0;
@@ -119,14 +170,39 @@ void allocBlock(LOF_fileP f, int* K, blockP buffer) {
         buffer->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
-void printLOF(LOF_fileP f, char file_name[20]) {
+void printLOF(LOF_fileP f, char file_name[20]){
+  // Ouvrir le fichier 
+    f->file = fopen(file_name, "rb");
 
-}     //afficher le contenue du fichier
+    // Vérifier si l'ouverture du fichier a réussi
+    if (f->file == NULL) {
+        printf("Erreur lors de l'ouverture du fichier");
+        return;
+    }
+
+    int blockNum = f->header->firstBlock;   // initialiser avec le numero du premier bloc
+    
+    while (blockNum != -1)
+    {
+        readBlock(f, blockNum, buffer);
+        for (int i = 0; i < buffer->NB; i++) {
+        printf("Block %d - Student %d:\n", blockNum, i + 1);
+            printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
+        }
+        printf("\n");
+        blockNum = buffer->svt;
+    }
+    
+    // Fermer le fichier
+    fclose(f->file);
+}
+
 
 
 void InitialLoading(char file_name[20]) {
 
 }    //fonction de chargement initial car le fichier est ordonne
+
 
 
 void createLOF(LOF_fileP f, char file_name[20], int N) {
