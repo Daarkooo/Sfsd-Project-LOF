@@ -6,42 +6,42 @@
 
 void printStudent(StudentP S) {
 
-    printf("Name : %s \t", S->name);
-    printf("Surname : %s \t", S->surname);
-    printf("Matricule : %d \n" , S->matricule );
+    printf("Name : %s", S->name);
+    printf("Surname : %s", S->surname);
+    printf("Matricule : %d \n\n" , S->matricule );
 
 }
 
 void createStudent(StudentP S) {
-
-    printf("Name : \n");
-    scanf("%19s",S->name);
-    printf("Surname : \n");
-    scanf("%19s",S->surname);
-    printf("Matricule : \n");
+    char ch[5];
+    fgets(ch, sizeof(ch), stdin);
+    printf("Name : ");
+    rewind(stdin);
+    fgets(S->name, sizeof(S->name), stdin);
+    printf("Surname : ");
+    rewind(stdin);  //reinitialiser le tampon stdin
+    fgets(S->surname, sizeof(S->surname), stdin); //fgets accepte les espaces
+    printf("Matricule : ");
     scanf("%d", &S->matricule);
     S->deleted=0;
-
 }
+
 void printBlock(blockP S) {
-    printf("\nStudent Information:\n");
+    printf("\n\t-----Student Information-----\t\n");
     for (int i = 0; i < S->NB; i++) {
-        
         printf("Student %d: \n", i + 1);
-        printStudent(&S->tab[i]);//afficher les information de le i eme etudiant
-
-
+        printStudent((S->tab) + i);//afficher les information de le i eme etudiant
     }
     
 } // afficher un block
 
 void createBlock(blockP S) {
-    printf("enter the numbre of students in this block \t");
+    printf("enter the numbre of students in this block : ");
     scanf("%d",&S->NB);
-    
+    printf("\n");
     for(int i=0 ; i<(S->NB) ; i++){
         printf("enter information for student numbre %d : \n",i+1);
-        createStudent(&S->tab[i]);
+        createStudent((S->tab) + i);
     }
 
 }
@@ -68,7 +68,7 @@ void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
 
 void closeLOF(LOF_fileP f, char file_name[20]){
     rewind(f->file); // position le curseur au debut de fichier 
-    fread(f->header,sizeof(header),1,f->file); // la sauvegarde du header 
+    fread(f->header,sizeof(header),1,f->file); // la sauvegarde de l'entete de file dans header
     fclose(f->file);// la fermeture du fichier
 
 }  //fermer le fichier logique
@@ -180,30 +180,29 @@ void printLOF(LOF_fileP f, char file_name[20]){
         return;
     }
 
-    // Aller a la position du premier bloc dans le fichier
-    fseek(f->file, sizeof(header), SEEK_SET);
-
-    // Lire et afficher le contenu de chaque bloc dans le fichier
-   block buffer;
-    for (int blockNum = f->header->firstBlock; blockNum <= f->header->lastBlock; blockNum++) {
-        // Lire le contenu du bloc dans le tampon
-        fread(&buffer, sizeof(block), 1, f->file);
-
-        // Afficher le contenu de chaque enregistrement logique (student) dans le bloc
-        for (int i = 0; i < buffer.NB; i++) {
-            printf("Block %d - Student %d:\n", blockNum, i + 1);
-            printStudent(&buffer.tab[i]); // Afficher les informations du i-ème étudiant
+    int blockNum = f->header->firstBlock;   // initialiser avec le numero du premier bloc
+    
+    while (blockNum != -1)
+    {
+        readBlock(f, blockNum, buffer);
+        for (int i = 0; i < buffer->NB; i++) {
+        printf("Block %d - Student %d:\n", blockNum, i + 1);
+            printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
         }
+        printf("\n");
+        blockNum = buffer->svt;
     }
-
+    
     // Fermer le fichier
     fclose(f->file);
-
 }
+
+
 
 void InitialLoading(char file_name[20]) {
 
 }    //fonction de chargement initial car le fichier est ordonne
+
 
 
 void createLOF(LOF_fileP f, char file_name[20], int N) {
