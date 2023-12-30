@@ -86,7 +86,7 @@ int readHeader(LOF_fileP f, int K) {
     case 4:
         return f->header->nbStudents;
     default:
-        printf("reading error, pick a valid number (1-4).\n")
+        printf("reading error, pick a valid number (1-4).\n");
         break;
     }
 }  //retourner le contenue du K ème champ de l'entete
