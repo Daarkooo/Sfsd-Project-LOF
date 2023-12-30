@@ -45,7 +45,7 @@ void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
 
 void closeLOF(LOF_fileP f, char file_name[20]){
     rewind(f->file); // position le curseur au debut de fichier 
-    fread(f->header,sizeof(header),1,f->file); // la sauvegarde du header 
+    fread(f->header,sizeof(header),1,f->file); // la sauvegarde de l'entete de file dans header
     fclose(f->file);// la fermeture du fichier
 
 }  //fermer le fichier logique
@@ -72,13 +72,13 @@ void writeHeader(LOF_fileP f, int K, int val) {
 }//affecter la valeur val au K ème champ de l'entete
 
 int readHeader(LOF_fileP f, int K) {
-    switch (k)
+    switch (K)
     {
     case 1:
         return f->header->firstBlock;
         break;
     case 2:
-        return f->header->lasBlock;
+        return f->header->lastBlock;
         break;
     case 3:
         return f->header->nbBlocks;
@@ -96,7 +96,7 @@ void printHeader(LOF_fileP f, char file_name[20]) {
 }  //afficher le contenue de l'entete
 
 void writeBlock(LOF_fileP f, int K, blockP buffer) {
-    fseek(f->file,sizeof(header)+((K)*sizeof(blockP)),SEEK_SET);
+    fseek(f->file,sizeof(header)+((K - 1)*sizeof(blockP)),SEEK_SET);
     fwrite(buffer,sizeof(blockP),1,f->file);
     rewind(f->file); // on se repositionne au debut de fichier 
 }  //mettre le contenue du tampon dans le bloc numero K
