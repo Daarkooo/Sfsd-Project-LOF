@@ -81,7 +81,7 @@ int readHeader(LOF_fileP f, int K) {
         val = f->header->firstBlock;
         break;
     case 2:
-        val = f->header->lasBlock;
+        val = f->header->lastBlock;
         break;
     case 3:
         val = f->header->nbBlocks;
@@ -89,7 +89,7 @@ int readHeader(LOF_fileP f, int K) {
     case 4:
         val = f->header->nbStudents;
     default:
-        printf("reading error, pick a valid number (1-4).\n")
+        printf("reading error, pick a valid number (1-4).\n");
         break;
     }
 }  //retourner le contenue du K ème champ de l'entete
