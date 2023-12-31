@@ -36,11 +36,11 @@ void printBlock(blockP S) {
 } // afficher un block
 
 void createBlock(blockP S) {
-    printf("enter the numbre of students in this block : ");
+    printf("enter the number of students in this block : ");
     scanf("%d",&S->NB);
     printf("\n");
     for(int i=0 ; i<(S->NB) ; i++){
-        printf("enter information for student numbre %d : \n",i+1);
+        printf("enter information for student number %d : \n",i+1);
         createStudent((S->tab) + i);
     }
 
@@ -214,6 +214,23 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
 }  //insertion d'un novelle enregistrement dans le fichier
 
 void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
+    int n_bloc,position,find,x;
+    blockP buffer;
+    if(f->file){
+        SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
+        if(find){ // s'il existe
+            openLOF(f,file_name,"r");
+            readBlock(f,n_bloc,buffer); // lire le n_bloc
+            buffer->tab[position].deleted=1; // deleted = true
+            buffer->NB--; // decrementer le nbr d'enregistrmnt logic dane le n_bloc
+            x = readHeader(file_name,4); // lire le nbr d'etudiant
+            x--1; 
+            writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
+            writeBlock(f,n_bloc,buffer); // saving
+            closeLOF(f,file_name);  // close the file
+        }else{  // doesn't exist
+            printf("ce matricule n'existe pas.");
+        }
 
 } //suppression de l'enregistrement si il existe
 
