@@ -215,23 +215,22 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
 
 void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
     int n_bloc,position,find,x;
-    blockP buffer;
     if(f->file){
         SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
         if(find){ // s'il existe
             openLOF(f,file_name,"r");
             readBlock(f,n_bloc,buffer); // lire le n_bloc
             buffer->tab[position].deleted=1; // deleted = true
-            buffer->NB--; // decrementer le nbr d'enregistrmnt logic dane le n_bloc
+            buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
             x = readHeader(file_name,4); // lire le nbr d'etudiant
-            x--1; 
+            x--; 
             writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
             writeBlock(f,n_bloc,buffer); // saving
             closeLOF(f,file_name);  // close the file
         }else{  // doesn't exist
             printf("ce matricule n'existe pas.");
         }
-
+    }
 } //suppression de l'enregistrement si il existe
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
