@@ -12,6 +12,13 @@ void printStudent(StudentP S) {
 
 }
 
+void studentCopy(StudentP S1, StudentP S2) {
+    strcpy(S1->name, S2->name);
+    strcpy(S1->surname, S2->surname);
+    S1->matricule = S2->matricule;
+    S1->deleted = S2->deleted;
+} //copier le contenue de l'etudiant S2 dans l'etudiant S1
+
 void createStudent(StudentP S) {
     char ch[5];
     fgets(ch, sizeof(ch), stdin);
@@ -66,7 +73,7 @@ void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
     }
 }//ouvrir le fichier logique
 
-void closeLOF(LOF_fileP f, char file_name[20]){
+void closeLOF(LOF_fileP f){
     rewind(f->file); // position le curseur au debut de fichier 
     fread(f->header,sizeof(header),1,f->file); // la sauvegarde de l'entete de file dans header
     fclose(f->file);// la fermeture du fichier
@@ -138,7 +145,7 @@ void printHeader(LOF_fileP f, char file_name[20]){
 
 void writeBlock(LOF_fileP f, int K, blockP buffer) {
     fseek(f->file,sizeof(header)+((K-1)*sizeof(blockP)),SEEK_SET);
-    fwrite(buffer,sizeof(blockP),1,f->file);
+    fwrite(buffer,sizeof(block),1,f->file);
     rewind(f->file); // on se repositionne au debut de fichier 
 }  //mettre le contenue du tampon dans le bloc numero K
 
@@ -157,6 +164,7 @@ void readBlock(LOF_fileP f, int K, blockP buffer){
 
 
 void allocBlock(LOF_fileP f, int* K, blockP buffer) {
+    buffer = malloc(sizeof(block));
     buffer->NB = 0;
     buffer->svt = -1;
     *K = readHeader(f, 3) + 1;
@@ -206,8 +214,41 @@ void InitialLoading(char file_name[20]) {
 
 
 void createLOF(LOF_fileP f, char file_name[20], int N) {
-
-}     //creation du fichier avec N enregistrement logique
+    StudentP S;
+    int k;
+    openLOF(f, file_name, 'w');
+    allocBlock(f, &k, buffer);
+    buffer->svt = -1;
+    writeHeader(f, 1, k);
+    writeHeader(f, 2, k);
+    int j = 0;
+    printf("Veuillez entrez les etudiants par ordre decroissant des matricules : \n");
+    //insertion des enregistrement en mode LIFO
+    for (int i = 0; i < N; i++)
+    {
+        createStudent(S);   //scanner l'etudiant
+        if (j <= MAX_E * LoadFact)  //tester si le compteur est inferieur a 60% de la capacite max du bloc
+        {
+            studentCopy((buffer->tab) + j, S);  //on reste dans le meme bloc  
+            j++;
+        }
+        else
+        {
+            buffer->NB = j--;
+            writeBlock(f, readHeader(f, 1), buffer);    //ecrire le buffer dans le fichier
+            allocBlock(f, &k, buffer);
+            buffer->svt = readHeader(f, 1); //nouveau buffer pointe sur le bloc tete du fichier
+            writeHeader(f, 1, k);   //nouveau buffer devient le nouveau bloc tete
+            studentCopy((buffer->tab), S);  //affecter S a la premiere case du nouveau buffer
+            j = 1;
+        }
+    }
+    buffer->NB = j--;
+    writeBlock(f, readHeader(f, 1), buffer);    //ecriture du dernier buffer dans le fichier
+    writeHeader(f, 1, k);   //le nouveau buffer devient le bloc tete
+    writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
+    closeLOF(f);    //fermer le fichier
+}     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
 

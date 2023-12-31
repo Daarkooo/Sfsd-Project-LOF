@@ -18,7 +18,7 @@ typedef struct Student
 
 // methode lié a l'enregistrement logique
 void printStudent(StudentP S); // afficher un etudiant
-
+void studentCopy(StudentP S1, StudentP S2); //copier le contenue de l'etudiant S2 dans l'etudiant S1
 void createStudent(StudentP S); // lire les informations d'un etudiant
 
 //------------------------------------------------------------------------
@@ -61,7 +61,7 @@ blockP buffer;
 //--------------------------------------------------------------------------
 //fonctions utilitaires durant le projet
 void openLOF(LOF_fileP f, char file_name[20], char open_mode);  //ouvrir le fichier logique
-void closeLOF(LOF_fileP f, char file_name[20]);  //fermer le fichier logique
+void closeLOF(LOF_fileP f);  //fermer le fichier logique
 void writeHeader(LOF_fileP f, int K, int val); //affecter la valeur val au K ème champ de l'entete
 int readHeader(LOF_fileP f, int K);  //retourner le contenue du K ème champ de l'entete
 void printHeader(LOF_fileP f, char file_name[20]);  //afficher le contenue de l'entete
