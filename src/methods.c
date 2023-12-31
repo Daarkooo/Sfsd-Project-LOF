@@ -120,7 +120,7 @@ void printHeader(LOF_fileP f, char file_name[20]){
 
     // Verification d'ouverture du fichier 
     if (f->file == NULL) {
-        perror("Erreur lors de l'ouverture du fichier");
+        printf("Erreur lors de l'ouverture du fichier");
         return;
     }
 
@@ -144,16 +144,13 @@ void writeBlock(LOF_fileP f, int K, blockP buffer) {
 
 void readBlock(LOF_fileP f, int K, blockP buffer){
 
-    // Calculer la position du bloc dans le fichier 
-    long position = sizeof(header) + (K-1) * sizeof(block);
-
     // Se deplacer a la position du bloc dans le fichier
-    fseek(f->file, position, SEEK_SET);
-
-    // Lire le contenu du bloc dans le tampon
+    fseek(f->file, sizeof(header) + (K-1) * sizeof(block), SEEK_SET);
+    // Lire le contenu du bloc dans le buffer
     fread(buffer, sizeof(block), 1, f->file);
-
-};  //mettre le contenue du bloc numero K dans le tampon
+    // on se repositionne au debut de fichier 
+    rewind(f->file); 
+};  //mettre le contenue du bloc numero K dans le buffer
 
 
 void allocBlock(LOF_fileP f, int* K, blockP buffer) {
@@ -235,8 +232,45 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
 
+*exist = 0; // Initialisation n'exist pas
+if(f->header->nbStudents!=0){
+
+
+    int blockNum = f->header->firstBlock;//initialiser avec le numero du premier bloc
+    while (blockNum != -1) {
+        readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
+        for (int i = 0; (i < MAX_E); i++) {
+            if( buffer->tab[i].deleted!=1){
+                continue;
+            }
+            if ((buffer->tab[i].matricule == matricule)) {
+                
+            
+                *BlockNB = blockNum;
+                *PositionNB = i;//la position de ploc numero i
+                *exist = 1; // Student exist
+                return;
+            }
+            }
+            blockNum = buffer->svt;//le numero de bloc suivant
+        }//verification de tout les "students" dans un bloc
+         
+        
+    }//verification de tout les blocs 
 }  //retourne le bloc, position de l'enregistrement s'il est trouve
 
 void ModifyStudent(LOF_fileP f, char file_name[20], int matricule, StudentP student) {
+    //les declaration necessaires pou la fonction de recherche
+  int blockNum, positionNB;
+    int exist;
+    if(f->header->nbStudents!=0){
+    SearchStudent(f, file_name, matricule, &blockNum, &positionNB, &exist);//la recherche de l'etudiant si il exist ainsi ca position et le numero de bloc
 
+    if (exist==1) {
+       
+        readBlock(f, blockNum, buffer);// mettre le contenue le buffer dans le fichier f
+        buffer->tab[positionNB] = *student;//mettre les informations de student dans l'etudiant numero positionNB dans le buffer
+        writeBlock(f, blockNum, buffer);//mettre les nouvelles informations insserer dans le buffer dans le fichier f
+    } 
+    }
 }   //modifier le contenue de l'enregistrement s'il existe
