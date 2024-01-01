@@ -72,8 +72,9 @@ void printLOF(LOF_fileP f, char file_name[20]);     //afficher le contenue du fi
 
 
 //-----------------------------------------------------------------------------
-//fonctions obligatoire pour la structure LOF
-void InitialLoading(char file_name[20]);    //fonction de chargement initial car le fichier est ordonne
+//fonctions obligatoire pour le tableau initial
+void scanTab(StudentP t, int length);   //creation du tableau
+void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
 
 
 //------------------------------------------------------------------------------
