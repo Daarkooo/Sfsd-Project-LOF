@@ -316,8 +316,7 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
         }
     }
 } //suppression de l'enregistrement si il existe
-
-
+// 2024
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
 
