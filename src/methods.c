@@ -297,7 +297,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
         allocBlock(f,&x,newBlock); // allouer a nv block
-        newBlock->tab[0] = student;
+        studentCopy(newBlock->tab, student);
         n_block=readHeader(f,2);
         readBlock(f,n_block,buffer);
         buffer->svt = x;
@@ -307,7 +307,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
     }else if (j==0 && i==readHeader(f,1)){ // le nv etudiant sera dans "la tete de liste"
         allocBlock(f,&x,newBlock);
-        newBlock->table[0]=
+        studentCopy(newBlock->tab, student);
         n_block=readHeader(f,1);
         readBlock(f,n_block,buffer);
         newBlock ->svt = readHeader(f,1);  // nv block -> premier block
@@ -320,7 +320,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         allocBlock(f,&x,newBlock);
         readBlock(f,i,buffer);
         if(buffer->tab[j].deleted){
-            buffer->tab[j]=student;
+            studentCopy((buffer->tab) + j, student);
             writeBlock(f,i,buffer);
             writeHeader(f,4,readHeader(f,4)+1);
         }else{
@@ -383,7 +383,7 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
             x--; 
             writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
             writeBlock(f,n_bloc,buffer); // saving
-            closeLOF(f,file_name);  // close the file
+            closeLOF(f);  // close the file
         }else{  // doesn't exist
             printf("ce matricule n'existe pas.");
         }
@@ -393,12 +393,12 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
 
-*exist = 0; // Initialisation n'exist pas
+    *exist = 0; // Initialisation n'exist pas
     if(readHeader(f, 4) != 0){
         int blockNum = readHeader(f, 1);    //initialiser avec le numero du premier bloc
         while (blockNum != -1) {
             readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
-            for (int i = 0; (i < MAX_E); i++) {
+            for (int i = 0; i < MAX_E; i++) {
                 if( buffer->tab[i].deleted != 1)
                     continue;
 
