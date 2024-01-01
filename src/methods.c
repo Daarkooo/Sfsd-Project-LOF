@@ -312,7 +312,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         allocBlock(f,&x,newBlock);
         readBlock(f,i,buffer);
         if(buffer->tab[j].deleted){ // si la case est deja suprime (concept logique)
-            buffer->tab[j]=student; // mettre le contenu de student dans le buffer qui porte le contenu de la case j du block i
+            studentCopy((buffer->tab) + j, student); // mettre le contenu de student dans le buffer qui porte le contenu de la case j du block i
             writeBlock(f,i,buffer); // l'ecrire dans le fichier 
             writeHeader(f,4,readHeader(f,4)+1);// student + 1 (header)
         }else{ // faire le decalge (en 2 moitie)
@@ -322,14 +322,14 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
                 for(int p=m;p>j;p--){
                 buffer->tab[p]= buffer->tab[p-1]; // decalage 
                 }
-                buffer->tab[j]=student;
+                studentCopy((buffer->tab) + j, student);
                 for(int p=1;p<=m+1;p++){
                     newBlock->tab[p]=buffer->tab[p+m]; // remplire le rest du nv block ave la 2em moitie du iem block
                     buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
                 }
             }else{ // si la case ou on vas inserer se trouve dans la deuxieme moitie
                 int indexnv=j-m-1;
-                newBlock->tab[indexnv]=student; // mettre le nv student dans la nv block direct
+                studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
                 for(int p=0;p<m;p++){
                     if(p==indexnv){ // passer a la prochaine case cuz we have already put our new student here
                         continue;
@@ -346,7 +346,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
             writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
         }
     }
-    closeLOF(f,file_name);
+    closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
 
 
