@@ -280,6 +280,7 @@ void createLOF(LOF_fileP f, char file_name[20], int N) {
     closeLOF(f);    //fermer le fichier
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
+
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
     int find,findIt,i,j,position,n_block,x,mat=1;
     blockP newBlock;
@@ -293,6 +294,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         createStudent(student);
         SearchStudent(f,file_name,student->matricule,&i,&j,&find);
     }
+
     SearchInsertionPosition(f,file_name,student->matricule,&i,&j);
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
@@ -305,53 +307,58 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         writeHeader(f,2,x); // ====
         writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
         writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
-    }else if (j==0 && i==readHeader(f,1)){ // le nv etudiant sera dans "la tete de liste"
-        allocBlock(f,&x,newBlock);
-        studentCopy(newBlock->tab, student);
-        n_block=readHeader(f,1);
-        readBlock(f,n_block,buffer);
-        newBlock ->svt = readHeader(f,1);  // nv block -> premier block
-        writeBlock(f,x,newBlock);
-        writeHeader(f,1,x);
-        writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
-        writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
-        allocBlock(f,&x,newBlock);
-    }else{
+
+    }else{ 
         allocBlock(f,&x,newBlock);
         readBlock(f,i,buffer);
-        if(buffer->tab[j].deleted){
-            studentCopy((buffer->tab) + j, student);
-            writeBlock(f,i,buffer);
-            writeHeader(f,4,readHeader(f,4)+1);
-        }else{
-            for(int p=0;p<MAX_E;p++){
-                // next time :)
-            }
-        }
+        if(buffer->tab[j].deleted){ // si la case est deja suprime (concept logique)
+            buffer->tab[j]=student; // mettre le contenu de student dans le buffer qui porte le contenu de la case j du block i
+            writeBlock(f,i,buffer); // l'ecrire dans le fichier 
+            writeHeader(f,4,readHeader(f,4)+1);// student + 1 (header)
+        }else{ // faire le decalge (en 2 moitie)
+            int m=MAX_E/2 -1; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+            if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
+                newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
+                for(int p=m;p>j;p--){
+                buffer->tab[p]= buffer->tab[p-1]; // decalage 
+                }
+                buffer->tab[j]=student;
+                for(int p=1;p<=m+1;p++){
+                    newBlock->tab[p]=buffer->tab[p+m]; // remplire le rest du nv block ave la 2em moitie du iem block
+                    buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
+                }
+            }else{ // si la case ou on vas inserer se trouve dans la deuxieme moitie
+                int indexnv=j-m-1;
+                newBlock->tab[indexnv]=student; // mettre le nv student dans la nv block direct
+                for(int p=0;p<m;p++){
+                    if(p==indexnv){ // passer a la prochaine case cuz we have already put our new student here
+                        continue;
+                    }
+                    newBlock->tab[p]=buffer->tab[p+m+1]; //
+                    buffer->tab[p+m+1].deleted=1; // la case deplace dans le nv block on la supprime du i em block
+                }
 
+            }
+            newBlock->svt=buffer->svt; // le nv block on le chaine avc le svt du i em block
+            buffer->svt=x;  // le i em block on le chaine avc le nv block 
+            writeBlock(f,x,newBlock);
+            writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
+            writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+        }
     }
-      //insertion d'un novelle enregistrement dans le fichier
-}
-/*void insertionAction(LOF_fileP f,int x, int n_block,blockP buffer,blockP newBlock, int act){
-    allocBlock(f,&x,newBlock); // allouer a nv block
-    n_block=readHeader(f,act);
-    readBlock(f,n_block,buffer);
-    buffer->svt = x;
-    writeBlock(f,x,newBlock);
-    writeHeader(f,act,x); // ====
-    writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
-    writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
-}*/  // for reducing the ammount of code lines
+    closeLOF(f,file_name);
+}//insertion d'un novelle enregistrement dans le fichier
+
 
 void SearchInsertionPosition(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB){
     if((readHeader(f,4))!=0){
-        int blockNum = readHeader(f,4);//initialiser avec le numero du premier bloc
+        int blockNum = readHeader(f,1);//initialiser avec le numero du premier bloc
         while (blockNum != -1) {
             readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
             for (int i = 0; (i < MAX_E); i++) {
-                if(buffer->tab[i].matricule > matricule ){ // trouver un matricule inferieur 
+                if(buffer->tab[i].matricule > matricule ){ // trouver un matricule superieur 
                     while (i>0){
-                        if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans la vrai liste)
+                        if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans le concept logique)
                             break;
                         }
                         i--;
