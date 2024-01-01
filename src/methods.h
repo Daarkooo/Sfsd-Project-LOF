@@ -80,6 +80,7 @@ void InitialLoading(char file_name[20]);    //fonction de chargement initial car
 //fonctions LOF specifiques pour ce projet
 void createLOF(LOF_fileP f, char file_name[20], int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
+void SearchInsertionPosition(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
 void DeleteStudent(LOF_fileP f, char file_name[20], int matricule); //suppression de l'enregistrement si il existe
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
 void ModifyStudent(LOF_fileP f, char file_name[20], int matricule, StudentP student);   //modifier le contenue de l'enregistrement s'il existe

@@ -12,7 +12,7 @@ void printStudent(StudentP S) {
 
 }
 
-void createStudent(StudentP S) {
+void createStudent(StudentP S) { 
     char ch[5];
     fgets(ch, sizeof(ch), stdin);
     printf("Name : ");
@@ -154,6 +154,7 @@ void readBlock(LOF_fileP f, int K, blockP buffer){
 
 
 void allocBlock(LOF_fileP f, int* K, blockP buffer) {
+    buffer=malloc(sizeof(block));
     buffer->NB = 0;
     buffer->svt = -1;
     *K = readHeader(f, 3) + 1;
@@ -207,8 +208,94 @@ void createLOF(LOF_fileP f, char file_name[20], int N) {
 }     //creation du fichier avec N enregistrement logique
 
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
+    int find,findIt,i,j,position,n_block,x,mat=1;
+    blockP newBlock;
 
-}  //insertion d'un novelle enregistrement dans le fichier
+    openLOF(file_name,file_name,"r");
+    // si le fichier existe
+    SearchStudent(f,file_name,student->matricule,&i,&j,&find); // on cherche le matricule si il existe
+    while (find) { // si il existe on boucle jusqu'a lustilisateur saisit un matricule qui n'existe pas
+        printf("Ce matricule existe deja.\n");
+        printf("donner un autre: ");
+        createStudent(student);
+        SearchStudent(f,file_name,student->matricule,&i,&j,&find);
+    }
+    SearchInsertionPosition(f,file_name,student->matricule,&i,&j);
+    
+    if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
+        allocBlock(f,&x,newBlock); // allouer a nv block
+        newBlock->tab[0] = student;
+        n_block=readHeader(f,2);
+        readBlock(f,n_block,buffer);
+        buffer->svt = x;
+        writeBlock(f,x,newBlock);
+        writeHeader(f,2,x); // ====
+        writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
+        writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+    }else if (j==0 && i==readHeader(f,1)){ // le nv etudiant sera dans "la tete de liste"
+        allocBlock(f,&x,newBlock);
+        newBlock->table[0]=
+        n_block=readHeader(f,1);
+        readBlock(f,n_block,buffer);
+        newBlock ->svt = readHeader(f,1);  // nv block -> premier block
+        writeBlock(f,x,newBlock);
+        writeHeader(f,1,x);
+        writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
+        writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+        allocBlock(f,&x,newBlock);
+    }else{
+        allocBlock(f,&x,newBlock);
+        readBlock(f,i,buffer);
+        if(buffer->tab[j].deleted){
+            buffer->tab[j]=student;
+            writeBlock(f,i,buffer);
+            writeHeader(f,4,readHeader(f,4)+1);
+        }else{
+            for(int p=0;p<MAX_E;p++){
+                // next time :)
+            }
+        }
+
+    }
+      //insertion d'un novelle enregistrement dans le fichier
+}
+/*void insertionAction(LOF_fileP f,int x, int n_block,blockP buffer,blockP newBlock, int act){
+    allocBlock(f,&x,newBlock); // allouer a nv block
+    n_block=readHeader(f,act);
+    readBlock(f,n_block,buffer);
+    buffer->svt = x;
+    writeBlock(f,x,newBlock);
+    writeHeader(f,act,x); // ====
+    writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
+    writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+}*/  // for reducing the ammount of code lines
+
+void SearchInsertionPosition(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB){
+    if((readHeader(f,4))!=0){
+        int blockNum = readHeader(f,4);//initialiser avec le numero du premier bloc
+        while (blockNum != -1) {
+            readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
+            for (int i = 0; (i < MAX_E); i++) {
+                if(buffer->tab[i].matricule > matricule ){ // trouver un matricule inferieur 
+                    while (i>0){
+                        if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans la vrai liste)
+                            break;
+                        }
+                        i--;
+                    }
+                    *BlockNB = blockNum;
+                    *PositionNB = i;
+                    break;
+                } 
+            }
+            if(buffer->svt==-1){
+                *PositionNB = -1; // dans le cas ou on a depasse le dernier etudiant du dernier block 
+            }   
+            blockNum = buffer->svt;//le numero de bloc suivant
+        }   
+    }//verification de tout les blocs 
+}// la recherche de la position ideale pour l'insertion
+
 
 void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
     int n_bloc,position,find,x;
@@ -229,6 +316,8 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
         }
     }
 } //suppression de l'enregistrement si il existe
+
+
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
 
