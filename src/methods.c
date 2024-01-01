@@ -12,6 +12,13 @@ void printStudent(StudentP S) {
 
 }
 
+void studentCopy(StudentP S1, StudentP S2) {
+    strcpy(S1->name, S2->name);
+    strcpy(S1->surname, S2->surname);
+    S1->matricule = S2->matricule;
+    S1->deleted = S2->deleted;
+} //copier le contenue de l'etudiant S2 dans l'etudiant S1
+
 void createStudent(StudentP S) { 
     char ch[5];
     fgets(ch, sizeof(ch), stdin);
@@ -66,7 +73,7 @@ void openLOF(LOF_fileP f, char file_name[20],const char open_mode) {
     }
 }//ouvrir le fichier logique
 
-void closeLOF(LOF_fileP f, char file_name[20]){
+void closeLOF(LOF_fileP f){
     rewind(f->file); // position le curseur au debut de fichier 
     fread(f->header,sizeof(header),1,f->file); // la sauvegarde de l'entete de file dans header
     fclose(f->file);// la fermeture du fichier
@@ -138,7 +145,7 @@ void printHeader(LOF_fileP f, char file_name[20]){
 
 void writeBlock(LOF_fileP f, int K, blockP buffer) {
     fseek(f->file,sizeof(header)+((K-1)*sizeof(blockP)),SEEK_SET);
-    fwrite(buffer,sizeof(blockP),1,f->file);
+    fwrite(buffer,sizeof(block),1,f->file);
     rewind(f->file); // on se repositionne au debut de fichier 
 }  //mettre le contenue du tampon dans le bloc numero K
 
@@ -154,7 +161,6 @@ void readBlock(LOF_fileP f, int K, blockP buffer){
 
 
 void allocBlock(LOF_fileP f, int* K, blockP buffer) {
-    buffer=malloc(sizeof(block));
     buffer->NB = 0;
     buffer->svt = -1;
     *K = readHeader(f, 3) + 1;
@@ -197,15 +203,82 @@ void printLOF(LOF_fileP f, char file_name[20]){
 
 
 
-void InitialLoading(char file_name[20]) {
+void scanTab(StudentP t, int length) {
+    t = malloc(sizeof(Student) * length);
+    printf("Entrez les informations des %d etudiants : \n", length);
+    for (int i = 0; i < length; i++) {
+        printf("Etudiant %d :\n", i+1);
+        createStudent(t + i);
+    }
+}   //creation du tableau
 
-}    //fonction de chargement initial car le fichier est ordonne
+void quickSortTab(StudentP tab, int start, int end) {
+   if (start >= end)
+        return;
+    
+    int pivot = tab[end].matricule;
+    int i = start - 1;
+    int temp;
+    for (int j = start; j < end; j++)
+    {
+        if (tab[j].matricule < pivot)
+        {
+            i++;
+            temp = tab[i].matricule;
+            tab[i].matricule = tab[j].matricule;
+            tab[j].matricule = temp;
+        }
+    }
+    i++;
+    temp = tab[i].matricule;
+    tab[i].matricule = tab[end].matricule;
+    tab[end].matricule = temp;
+    quickSort(tab, start, i - 1);
+    quickSort(tab, i + 1, end); 
+}   //trier le tableau en ordre croissant du matricule (la cle)
 
 
 
 void createLOF(LOF_fileP f, char file_name[20], int N) {
-
-}     //creation du fichier avec N enregistrement logique
+    StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
+    int k, BlockNB = 0;
+    openLOF(f, file_name, 'w');
+    allocBlock(f, &k, buffer);
+    BlockNB++;
+    buffer->svt = -1;
+    writeHeader(f, 1, k);
+    writeHeader(f, 2, k);
+    int j = 0;
+    scanTab(StudentTab, N); //scanner les N enregistrements
+    quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
+    //insertion des enregistrement en mode LIFO
+    for (int i = N - 1; i >= 0; i--)
+    {
+        if (j <= MAX_E * LoadFact)  //tester si le compteur est inferieur a 60% de la capacite max du bloc
+        {
+            studentCopy((buffer->tab) + j, StudentTab + i);  //on reste dans le meme bloc  
+            j++;
+        }
+        else
+        {
+            buffer->NB = j--;
+            writeBlock(f, readHeader(f, 1), buffer);    //ecrire le buffer dans le fichier
+            allocBlock(f, &k, buffer);
+            BlockNB++;  //incrementer le nombre de bloc apres chaque allocation
+            buffer->svt = readHeader(f, 1); //nouveau buffer pointe sur le bloc tete du fichier
+            writeHeader(f, 1, k);   //nouveau buffer devient le nouveau bloc tete
+            studentCopy((buffer->tab), StudentTab + i);  //affecter S a la premiere case du nouveau buffer
+            j = 1;
+        }
+    }
+    free(StudentTab);
+    buffer->NB = j--;
+    writeBlock(f, readHeader(f, 1), buffer);    //ecriture du dernier buffer dans le fichier
+    writeHeader(f, 1, k);   //le nouveau buffer devient le bloc tete
+    writeHeader(f, 3, BlockNB); //nombre de bloc allouer durant la creation
+    writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
+    closeLOF(f);    //fermer le fichier
+}     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 
 void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
@@ -226,7 +299,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
         allocBlock(f,&x,newBlock); // allouer a nv block
-        newBlock->tab[0] = student;
+        studentCopy(newBlock->tab, student);
         n_block=readHeader(f,2);
         readBlock(f,n_block,buffer);
         buffer->svt = x;
@@ -234,6 +307,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
         writeHeader(f,2,x); // ====
         writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
         writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+
     }else{ 
         allocBlock(f,&x,newBlock);
         readBlock(f,i,buffer);
@@ -263,6 +337,7 @@ void insertStudent(LOF_fileP f, char file_name[20], StudentP student) {
                     newBlock->tab[p]=buffer->tab[p+m+1]; //
                     buffer->tab[p+m+1].deleted=1; // la case deplace dans le nv block on la supprime du i em block
                 }
+
             }
             newBlock->svt=buffer->svt; // le nv block on le chaine avc le svt du i em block
             buffer->svt=x;  // le i em block on le chaine avc le nv block 
@@ -315,7 +390,7 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
             x--; 
             writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
             writeBlock(f,n_bloc,buffer); // saving
-            closeLOF(f,file_name);  // close the file
+            closeLOF(f);  // close the file
         }else{  // doesn't exist
             printf("ce matricule n'existe pas.");
         }
@@ -325,45 +400,38 @@ void DeleteStudent(LOF_fileP f, char file_name[20], int matricule) {
 
 void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
 
-*exist = 0; // Initialisation n'exist pas
-if(f->header->nbStudents!=0){
+    *exist = 0; // Initialisation n'exist pas
+    if(readHeader(f, 4) != 0){
+        int blockNum = readHeader(f, 1);    //initialiser avec le numero du premier bloc
+        while (blockNum != -1) {
+            readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
+            for (int i = 0; i < MAX_E; i++) {
+                if( buffer->tab[i].deleted != 1)
+                    continue;
 
-
-    int blockNum = f->header->firstBlock;//initialiser avec le numero du premier bloc
-    while (blockNum != -1) {
-        readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
-        for (int i = 0; (i < MAX_E); i++) {
-            if( buffer->tab[i].deleted!=1){
-                continue;
+                if ((buffer->tab[i].matricule == matricule)) {
+                    *BlockNB = blockNum;
+                    *PositionNB = i;    //la position de bloc numero i
+                    *exist = 1; // Student exists
+                    return;
+                }
             }
-            if ((buffer->tab[i].matricule == matricule)) {
-                
-            
-                *BlockNB = blockNum;
-                *PositionNB = i;//la position de ploc numero i
-                *exist = 1; // Student exist
-                return;
-            }
-            }
-            blockNum = buffer->svt;//le numero de bloc suivant
-        }//verification de tout les "students" dans un bloc
-         
-        
-    }//verification de tout les blocs 
+            blockNum = buffer->svt; //le numero de bloc suivant
+        }   //verification de tout les "students" dans un bloc
+    }   //verification de tout les blocs
 }  //retourne le bloc, position de l'enregistrement s'il est trouve
 
 void ModifyStudent(LOF_fileP f, char file_name[20], int matricule, StudentP student) {
     //les declaration necessaires pou la fonction de recherche
-  int blockNum, positionNB;
+    int blockNum, positionNB;
     int exist;
-    if(f->header->nbStudents!=0){
-    SearchStudent(f, file_name, matricule, &blockNum, &positionNB, &exist);//la recherche de l'etudiant si il exist ainsi ca position et le numero de bloc
+    if(readHeader(f, 4) != 0){
+        SearchStudent(f, file_name, matricule, &blockNum, &positionNB, &exist);//la recherche de l'etudiant si il exist ainsi ca position et le numero de bloc
 
-    if (exist==1) {
-       
-        readBlock(f, blockNum, buffer);// mettre le contenue le buffer dans le fichier f
-        buffer->tab[positionNB] = *student;//mettre les informations de student dans l'etudiant numero positionNB dans le buffer
-        writeBlock(f, blockNum, buffer);//mettre les nouvelles informations insserer dans le buffer dans le fichier f
-    } 
+        if (exist==1) {
+            readBlock(f, blockNum, buffer); // mettre le contenue le buffer dans le fichier f
+            studentCopy((buffer->tab) + positionNB, student);   //mettre les informations de student dans l'etudiant numero positionNB dans le buffer
+            writeBlock(f, blockNum, buffer);    //mettre les nouvelles informations insserer dans le buffer dans le fichier f
+        }
     }
 }   //modifier le contenue de l'enregistrement s'il existe
