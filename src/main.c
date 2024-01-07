@@ -29,11 +29,37 @@ int main(int argc, char *argv[])
 
     // int X = readHeader(fichierLOF, 1);
     // int Y = readHeader(fichierLOF, 3);
+
     // printf("\n%d\n%d\n", X, Y);
+
+    // //ALLOUER UN PREMIER BLOC :
+    // int X;
+    // allocBlock(fichierLOF, &X, &buffer);
+    // createBlock(buffer);
+
+    // writeBlock(fichierLOF, X, buffer);
+
+    // //ALLOUER UN DEUXIEME BLOC :
+    // int Y;
+    // allocBlock(fichierLOF, &Y, &buffer);
+    // createBlock(buffer);
+
+    // writeBlock(fichierLOF, Y, buffer);
+
+    // //AFFICHAGE DES DEUX BLOC ALOUEE :
+    // readBlock(fichierLOF, X, buffer);
+    // printBlock(buffer);
+    // readBlock(fichierLOF, Y, buffer);
+    // printBlock(buffer);
+    
 
     // closeLOF(fichierLOF);
 
+    // printHeader(fichierLOF, "test.bin");    
+
+
     //---------------- FONCTIONS PAR ENCORE VÉRIFIÉS ---------------
+
 
 
 
