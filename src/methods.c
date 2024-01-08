@@ -211,17 +211,18 @@ void printLOF(LOF_fileP f, char file_name[20]){
 
 
 
-void scanTab(StudentP t, int length) {
+StudentP scanTab(StudentP t, int length) {
     t = malloc(sizeof(Student) * length);
     printf("Entrez les informations des %d etudiants : \n", length);
     for (int i = 0; i < length; i++) {
         printf("Etudiant %d :\n", i+1);
         createStudent(t + i);
     }
+    return t;
 }   //creation du tableau
 
 void quickSortTab(StudentP tab, int start, int end) {
-   if (start >= end)
+    if (start >= end)
         return;
     
     int pivot = tab[end].matricule;
@@ -256,7 +257,7 @@ void createLOF(LOF_fileP f, char file_name[20], int N) {
     writeHeader(f, 1, k);
     writeHeader(f, 2, k);
     int j = 0;
-    scanTab(StudentTab, N); //scanner les N enregistrements
+    StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
     //insertion des enregistrement en mode LIFO
     for (int i = N - 1; i >= 0; i--)
