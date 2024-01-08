@@ -58,22 +58,24 @@ int main(int argc, char *argv[])
     // printHeader(fichierLOF, "test.bin");    
 
 
-    // StudentP t;
-    // t = scanTab(t, 4);
+    StudentP t;
+    t = scanTab(t, 4);
+
+    printf("\n---------- LE CONTENUE DU TABLEAU AVANT LE TRIE -------\n");
+    for (int i = 0; i < 4; i++)
+        printStudent(t + i);
+    
+    quickSortTab(t, 0, 3);
+
+    printf("\n---------- LE CONTENUE DU TABLEAU APRES LE QUICKSORT -------\n");
+    for (int i = 0; i < 4; i++)
+        printStudent(t + i);
 
 
     //---------------- FONCTIONS PAR ENCORE VÉRIFIÉS ---------------
 
 
-    // printf("\n---------- LE CONTENUE DU TABLEAU AVANT LE TRIE -------\n");
-    // for (int i = 0; i < 4; i++)
-    //     printStudent(t + i);
-    
-    // quickSortTab(t, 0, 3);
 
-    // printf("\n---------- LE CONTENUE DU TABLEAU APRES LE QUICKSORT -------\n");
-    // for (int i = 0; i < 4; i++)
-    //     printStudent(t + i);
 
 
     return 0;

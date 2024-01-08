@@ -227,21 +227,21 @@ void quickSortTab(StudentP tab, int start, int end) {
     
     int pivot = tab[end].matricule;
     int i = start - 1;
-    int temp;
+    Student temp;
     for (int j = start; j < end; j++)
     {
         if (tab[j].matricule < pivot)
         {
             i++;
-            temp = tab[i].matricule;
-            tab[i].matricule = tab[j].matricule;
-            tab[j].matricule = temp;
+            studentCopy(&temp, tab + i);
+            studentCopy(tab + i, tab + j);
+            studentCopy(tab + j, &temp);
         }
     }
     i++;
-    temp = tab[i].matricule;
-    tab[i].matricule = tab[end].matricule;
-    tab[end].matricule = temp;
+    studentCopy(&temp, tab + i);
+    studentCopy(tab + i, tab + end);
+    studentCopy(tab + end, &temp);
     quickSortTab(tab, start, i - 1);
     quickSortTab(tab, i + 1, end); 
 }   //trier le tableau en ordre croissant du matricule (la cle)
