@@ -319,7 +319,9 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     closeLOF(f);    //fermer le fichier    
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
-void InitTabIndex(LOF_fileP f, char file_name[], IndexP *tabIndex){
+IndexP InitTabIndex(LOF_fileP f, char file_name[]){
+    int nb = readHeader(f, 3);
+    IndexP tabIndex = malloc(sizeof(Index)*nb);
     f = openLOF(f, file_name, 'o');
     int blockNum = readHeader(f, 1);
     int k=0; // k em case de la tabindex
@@ -338,13 +340,14 @@ void InitTabIndex(LOF_fileP f, char file_name[], IndexP *tabIndex){
             }
             i++;
         }   
-        (*tabIndex + k)->cle=buffer->tab[i].matricule;
-        (*tabIndex + k)->adr_block=blockNum;
+        (tabIndex + k)->cle=buffer->tab[i].matricule;
+        (tabIndex + k)->adr_block=blockNum;
         k++;
         blockNum = buffer->svt;
     }
     
     closeLOF(f);
+    return tabIndex;
 }
 
 

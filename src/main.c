@@ -76,24 +76,32 @@ int main(int argc, char *argv[])
     //---------------------- CreateLOF and ExtractLOF methods ---------------------
     LOF_fileP fichierLOF;
     int n;
+    IndexP tab;
     printf("Combien d'etudiant voulez vous inserez : ");
     scanf("%d",&n);
 
     createLOF(fichierLOF, "test.bin", n);
+    printTerminal(fichierLOF,"test.bin");
+    tab = InitTabIndex(fichierLOF,"test.bin");
+    for(int i=0;i<n;i++){
+        printf("case %d- cle %d - adresse %d\n",i, tab[i].cle, tab[i].adr_block);
+    }
 
 
-    printf("Combien d'etudiant voulez vous inserez : ");
-    scanf("%d",&n);
 
-    createLOF(fichierLOF, "test2.bin", n);
 
-    printf("\n");    
-    printHeader(fichierLOF, "test.bin");
-    printf("\n");
-    printHeader(fichierLOF, "test2.bin");
 
-    extractLOF(fichierLOF, "test.bin", "student.txt");
-    extractLOF(fichierLOF, "test2.bin", "student2.txt");
+
+
+    // extractLOF(fichierLOF, "test.bin", "student.txt");
+    // createLOF(fichierLOF, "test2.bin", n);
+
+    // printf("\n");    
+    // printHeader(fichierLOF, "test.bin");
+    // printf("\n");
+    // printHeader(fichierLOF, "test2.bin");
+
+    // extractLOF(fichierLOF, "test2.bin", "student2.txt");
 
     // printHeader(fichierLOF, "test.bin");
 
