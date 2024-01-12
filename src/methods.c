@@ -66,6 +66,7 @@ LOF_fileP openLOF(LOF_fileP f, char file_name[],char open_mode) {
         f->file = fopen(file_name, "rb+");
         f->header = malloc(sizeof(header));
         fread(f->header, sizeof(header), 1, f->file);
+        rewind(f->file);
     } else if (open_mode == 'n')
     {   // On ouvre le fichier en mode NEW 'n' (le fichier est nouveau et n'existe pas, on le cree et on initialise l'entete)
         f->file = fopen(file_name, "wb+");
@@ -140,7 +141,6 @@ void printHeader(LOF_fileP f, char file_name[]){
     }
 
     // Lire l'entête à partir du fichier
-    rewind(f->file);    //postionner le curseur au debut du fichier
     fread(f->header, sizeof(header), 1, f->file);
 
     // Afficher le contenu de l'entête
@@ -184,10 +184,10 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
         (*buffer)->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
-void extractLOF(LOF_fileP f, char file_name[]){
-    f = openLOF(f, file_name, 'o');
-    FILE* studentWriter = fopen("student.txt", "w");
 
+void extractLOF(LOF_fileP f, char file_name[], char result[]){
+    f = openLOF(f, file_name, 'o');
+    FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i = 1;
     while (numBlock != -1)
@@ -213,7 +213,6 @@ void extractLOF(LOF_fileP f, char file_name[]){
             
             i++;
         }
-        printf("\n");
         numBlock = buffer->svt;
     }
 
