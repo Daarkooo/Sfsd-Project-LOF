@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
     printf("\n");
     printHeader(fichierLOF, "test2.bin");
 
-    // extractLOF(fichierLOF, "test.bin", "student.txt");
-    // extractLOF(fichierLOF, "test2.bin", "student2.txt");
+    extractLOF(fichierLOF, "test.bin", "student.txt");
+    extractLOF(fichierLOF, "test2.bin", "student2.txt");
 
     // printHeader(fichierLOF, "test.bin");
 
