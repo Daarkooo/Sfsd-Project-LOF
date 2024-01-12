@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     //     printStudent(t + i);
 
 
+    //---------------------- CreateLOF and ExtractLOF methods ---------------------
     LOF_fileP fichierLOF;
 
     int n;
@@ -80,23 +81,25 @@ int main(int argc, char *argv[])
 
     createLOF(fichierLOF, "test.bin", n);
 
-    printHeader(fichierLOF, "test.bin");
+    extractLOF(fichierLOF, "test.bin");
 
-    fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
+    // printHeader(fichierLOF, "test.bin");
 
-    int numBlock = readHeader(fichierLOF, 1);
-    int i = 1;
-    while (numBlock != -1)
-    {
-        readBlock(fichierLOF, numBlock, buffer);
-        printf("\nBLOCK NUMERO %d : \n", i);
-        printBlock(buffer);
-        printf("le suivant : %d\n", buffer->svt);
-        numBlock = buffer->svt;
-        i++;
-    }
+    // fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
 
-    closeLOF(fichierLOF);
+    // int numBlock = readHeader(fichierLOF, 1);
+    // int i = 1;
+    // while (numBlock != -1)
+    // {
+    //     readBlock(fichierLOF, numBlock, buffer);
+    //     printf("\nBLOCK NUMERO %d : \n", i);
+    //     printBlock(buffer);
+    //     printf("le suivant : %d\n", buffer->svt);
+    //     numBlock = buffer->svt;
+    //     i++;
+    // }
+
+    // closeLOF(fichierLOF);
 
 
     //---------------- FONCTIONS PAR ENCORE VÉRIFIÉS ---------------
