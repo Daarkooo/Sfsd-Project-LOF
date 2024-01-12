@@ -37,7 +37,7 @@ void createStudent(StudentP S) {
 }
 
 void printBlock(blockP S) {
-    printf("\n\t-----Student Information-----\t\n");
+    printf("\t-----Student Information-----\t\n");
     for (int i = 0; i < S->NB; i++) {
         printf("Student %d: \n", i + 1);
         printStudent((S->tab) + i);//afficher les information de le i eme etudiant
@@ -251,18 +251,28 @@ void quickSortTab(StudentP tab, int start, int end) {
 void createLOF(LOF_fileP f, char file_name[20], int N) {
     StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
     int k;
-    f = openLOF(f, file_name, 'n');
-    allocBlock(f, &k, &buffer);
-    buffer->svt = -1;
-    writeHeader(f, 1, k);
-    writeHeader(f, 2, k);
-    int j = 0;
+    blockP NewBuffer;
     StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
-    //insertion des enregistrement en mode LIFO
-    for (int i = N - 1; i >= 0; i--)
+    
+    //insertion des enregistrement en mode FIFO :
+    f = openLOF(f, file_name, 'n');
+    allocBlock(f, &k, &buffer);
+    writeHeader(f, 1, k);
+    writeHeader(f, 2, k);   //considerer le nouveau buffer comme firstBlock et lastBlock
+
+    int i = 0;
+    int j = 0;
+    while (i < N && i < MAX_E * LoadFact)   //remplire le premier bloc
     {
-        if (j <= MAX_E * LoadFact)  //tester si le compteur est inferieur a 60% de la capacite max du bloc
+        studentCopy((buffer->tab) + j, StudentTab + i);
+        i++;
+        j++;
+    }
+
+    while (i < N)
+    {
+        if (j < MAX_E * LoadFact)  //tester si le compteur est inferieur a 50% de la capacite max du bloc
         {
             studentCopy((buffer->tab) + j, StudentTab + i);  //on reste dans le meme bloc  
             j++;
@@ -270,20 +280,23 @@ void createLOF(LOF_fileP f, char file_name[20], int N) {
         else
         {
             buffer->NB = j--;
-            writeBlock(f, readHeader(f, 1), buffer);    //ecrire le buffer dans le fichier
-            allocBlock(f, &k, &buffer);
-            buffer->svt = readHeader(f, 1); //nouveau buffer pointe sur le bloc tete du fichier
-            writeHeader(f, 1, k);   //nouveau buffer devient le nouveau bloc tete
+            int oldSVT = buffer->svt;   //sauvegarder l'ancier bloc
+            allocBlock(f, &k, &NewBuffer);
+            writeHeader(f, 2, k);   //allouer un nouveau bloc et l'affecter comme lastBlock
+            buffer->svt = k;    //mettre a jour le champ svt
+            writeBlock(f, oldSVT, buffer);  //ecrire buffer dans l'ancien emplacement sauvegarder precedemment
+            readBlock(f, buffer->svt, buffer);
             studentCopy((buffer->tab), StudentTab + i);  //affecter S a la premiere case du nouveau buffer
             j = 1;
         }
+        i++;
     }
     free(StudentTab);
     buffer->NB = j--;
-    writeBlock(f, readHeader(f, 1), buffer);    //ecriture du dernier buffer dans le fichier
-    writeHeader(f, 1, k);   //le nouveau buffer devient le bloc tete
+    buffer->svt = -1;   //mettre le svt du dernier bloc a -1 (nil)
+    writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
-    closeLOF(f);    //fermer le fichier
+    closeLOF(f);    //fermer le fichier    
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 

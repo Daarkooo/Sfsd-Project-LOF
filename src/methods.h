@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_E 10 // nombre maximum d'enregistrement dans un bloc
-#define LoadFact 0.6    // facteur de chargement
+#define MAX_E 6 // nombre maximum d'enregistrement dans un bloc
+#define LoadFact 0.5    // facteur de chargement
 
 // declaration de l'enregistrement logique
 typedef struct Student

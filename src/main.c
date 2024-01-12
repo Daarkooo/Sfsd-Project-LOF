@@ -58,25 +58,51 @@ int main(int argc, char *argv[])
     // printHeader(fichierLOF, "test.bin");    
 
 
-    StudentP t;
-    t = scanTab(t, 4);
+    // StudentP t;
+    // t = scanTab(t, 4);
 
-    printf("\n---------- LE CONTENUE DU TABLEAU AVANT LE TRIE -------\n");
-    for (int i = 0; i < 4; i++)
-        printStudent(t + i);
+    // printf("\n---------- LE CONTENUE DU TABLEAU AVANT LE TRIE -------\n");
+    // for (int i = 0; i < 4; i++)
+    //     printStudent(t + i);
     
-    quickSortTab(t, 0, 3);
+    // quickSortTab(t, 0, 3);
 
-    printf("\n---------- LE CONTENUE DU TABLEAU APRES LE QUICKSORT -------\n");
-    for (int i = 0; i < 4; i++)
-        printStudent(t + i);
+    // printf("\n---------- LE CONTENUE DU TABLEAU APRES LE QUICKSORT -------\n");
+    // for (int i = 0; i < 4; i++)
+    //     printStudent(t + i);
+
+
+    LOF_fileP fichierLOF;
+
+    int n;
+    printf("Combien d'etudiant voulez vous inserez : ");
+    scanf("%d",&n);
+
+    createLOF(fichierLOF, "test.bin", n);
+
+    printHeader(fichierLOF, "test.bin");
+
+    fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
+
+    int numBlock = readHeader(fichierLOF, 1);
+    int i = 1;
+    while (numBlock != -1)
+    {
+        readBlock(fichierLOF, numBlock, buffer);
+        printf("\nBLOCK NUMERO %d : \n", i);
+        printBlock(buffer);
+        printf("le suivant : %d\n", buffer->svt);
+        numBlock = buffer->svt;
+        i++;
+    }
+
+    closeLOF(fichierLOF);
 
 
     //---------------- FONCTIONS PAR ENCORE VÉRIFIÉS ---------------
 
 
-
-
+    
 
     return 0;
 }
