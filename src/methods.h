@@ -70,7 +70,7 @@ void printHeader(LOF_fileP f, char file_name[20]);  //afficher le contenue de l'
 void writeBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du tampon dans le bloc numero K
 void readBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du bloc numero K dans le tampon
 void allocBlock(LOF_fileP f, int* K, blockP* buffer);   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
-void extractLOF(LOF_fileP f, char file_name[20]);     //afficher le contenue du fichier
+void extractLOF(LOF_fileP f, char file_name[20], char result[20]);     //afficher le contenue du fichier
 
 
 //-----------------------------------------------------------------------------

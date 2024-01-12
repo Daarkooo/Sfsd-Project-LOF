@@ -74,14 +74,25 @@ int main(int argc, char *argv[])
 
     //---------------------- CreateLOF and ExtractLOF methods ---------------------
     LOF_fileP fichierLOF;
-
     int n;
     printf("Combien d'etudiant voulez vous inserez : ");
     scanf("%d",&n);
 
     createLOF(fichierLOF, "test.bin", n);
 
-    extractLOF(fichierLOF, "test.bin");
+
+    printf("Combien d'etudiant voulez vous inserez : ");
+    scanf("%d",&n);
+
+    createLOF(fichierLOF, "test2.bin", n);
+
+    printf("\n");    
+    printHeader(fichierLOF, "test.bin");
+    printf("\n");
+    printHeader(fichierLOF, "test2.bin");
+
+    extractLOF(fichierLOF, "test.bin", "student.txt");
+    extractLOF(fichierLOF, "test2.bin", "student2.txt");
 
     // printHeader(fichierLOF, "test.bin");
 
