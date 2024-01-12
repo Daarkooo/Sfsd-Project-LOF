@@ -64,6 +64,8 @@ LOF_fileP openLOF(LOF_fileP f, char file_name[],char open_mode) {
     
     if (open_mode == 'o') {  // On ouvre le fichier en mode OLD 'o' (le fichier est ancien et existe deja)
         f->file = fopen(file_name, "rb+");
+        if (f->file == NULL)
+            return NULL;
         f->header = malloc(sizeof(header));
         fread(f->header, sizeof(header), 1, f->file);
         rewind(f->file);
@@ -183,6 +185,7 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
     for (int i = 0; i < MAX_E; i++)
         (*buffer)->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
+
 
 
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
