@@ -62,15 +62,15 @@ blockP buffer;
 
 //--------------------------------------------------------------------------
 //fonctions utilitaires durant le projet
-LOF_fileP openLOF(LOF_fileP f, char file_name[20], char open_mode);  //ouvrir le fichier logique
+LOF_fileP openLOF(LOF_fileP f, char file_name[], char open_mode);  //ouvrir le fichier logique
 void closeLOF(LOF_fileP f);  //fermer le fichier logique
 void writeHeader(LOF_fileP f, int K, int val); //affecter la valeur val au K ème champ de l'entete
 int readHeader(LOF_fileP f, int K);  //retourner le contenue du K ème champ de l'entete
-void printHeader(LOF_fileP f, char file_name[20]);  //afficher le contenue de l'entete
+void printHeader(LOF_fileP f, char file_name[]);  //afficher le contenue de l'entete
 void writeBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du tampon dans le bloc numero K
 void readBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du bloc numero K dans le tampon
 void allocBlock(LOF_fileP f, int* K, blockP* buffer);   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
-void extractLOF(LOF_fileP f, char file_name[20], char result[20]);     //afficher le contenue du fichier
+void extractLOF(LOF_fileP f, char file_name[], char result[]);     //afficher le contenue du fichier
 
 
 //-----------------------------------------------------------------------------
@@ -81,12 +81,12 @@ void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ord
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
-void createLOF(LOF_fileP f, char file_name[20], int N);     //creation du fichier avec N enregistrement logique
-void insertStudent(LOF_fileP f, char file_name[20], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
-void SearchInsertionPosition(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
-void DeleteStudent(LOF_fileP f, char file_name[20], int matricule); //suppression de l'enregistrement si il existe
-void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
-void ModifyStudent(LOF_fileP f, char file_name[20], int matricule, StudentP student);   //modifier le contenue de l'enregistrement s'il existe
+void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
+void insertStudent(LOF_fileP f, char file_name[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
+void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
+void DeleteStudent(LOF_fileP f, char file_name[], int matricule); //suppression de l'enregistrement si il existe
+void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
+void ModifyStudent(LOF_fileP f, char file_name[], int matricule, StudentP student);   //modifier le contenue de l'enregistrement s'il existe
 
 
 
