@@ -182,31 +182,34 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
         (*buffer)->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
-void printLOF(LOF_fileP f, char file_name[20]){
-  // Ouvrir le fichier 
-    f->file = fopen(file_name, "rb");
+void extractLOF(LOF_fileP f, char file_name[20]){
+    f = openLOF(f, file_name, 'o');
+    FILE* studentWriter = fopen("student.txt", "w");
 
-    // Vérifier si l'ouverture du fichier a réussi
-    if (f->file == NULL) {
-        printf("Erreur lors de l'ouverture du fichier");
-        return;
-    }
-
-    int blockNum = f->header->firstBlock;   // initialiser avec le numero du premier bloc
-    
-    while (blockNum != -1)
+    int numBlock = readHeader(f, 1);
+    int i = 1;
+    while (numBlock != -1)
     {
-        readBlock(f, blockNum, buffer);
-        for (int i = 0; i < buffer->NB; i++) {
-        printf("Block %d - Student %d:\n", blockNum, i + 1);
-            printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
+        readBlock(f, numBlock, buffer);
+        int i = 0;
+        int j = 0;
+        fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
+        while (i < MAX_E && j < buffer->NB)
+        {
+            if (buffer->tab[i].deleted == 0)
+            {
+                fprintf(studentWriter, "Student %d:\n", i + 1);
+                fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
+                j++;
+            }
+            i++;
         }
         printf("\n");
-        blockNum = buffer->svt;
+        numBlock = buffer->svt;
     }
-    
-    // Fermer le fichier
-    fclose(f->file);
+
+    closeLOF(f);
+    fclose(studentWriter);
 }
 
 
