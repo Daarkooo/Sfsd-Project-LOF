@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_E 10 // nombre maximum d'enregistrement dans un bloc
-#define LoadFact 0.6    // facteur de chargement
+#define MAX_E 6 // nombre maximum d'enregistrement dans un bloc
+#define LoadFact 0.5    // facteur de chargement
 
 // declaration de l'enregistrement logique
 typedef struct Student
@@ -15,6 +15,8 @@ typedef struct Student
     int matricule; // consideré comme la clé pour le tri
     int deleted;    //champ pour la supression logique
 } Student, *StudentP;
+
+void viderBuffer(); //fonction pour vider le flux d'entree
 
 // methode lié a l'enregistrement logique
 void printStudent(StudentP S); // afficher un etudiant
@@ -60,20 +62,20 @@ blockP buffer;
 
 //--------------------------------------------------------------------------
 //fonctions utilitaires durant le projet
-void openLOF(LOF_fileP f, char file_name[20], char open_mode);  //ouvrir le fichier logique
+LOF_fileP openLOF(LOF_fileP f, char file_name[20], char open_mode);  //ouvrir le fichier logique
 void closeLOF(LOF_fileP f);  //fermer le fichier logique
 void writeHeader(LOF_fileP f, int K, int val); //affecter la valeur val au K ème champ de l'entete
 int readHeader(LOF_fileP f, int K);  //retourner le contenue du K ème champ de l'entete
 void printHeader(LOF_fileP f, char file_name[20]);  //afficher le contenue de l'entete
 void writeBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du tampon dans le bloc numero K
 void readBlock(LOF_fileP f, int K, blockP buffer);  //mettre le contenue du bloc numero K dans le tampon
-void allocBlock(LOF_fileP f, int* K, blockP buffer);   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
+void allocBlock(LOF_fileP f, int* K, blockP* buffer);   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 void printLOF(LOF_fileP f, char file_name[20]);     //afficher le contenue du fichier
 
 
 //-----------------------------------------------------------------------------
 //fonctions obligatoire pour le tableau initial
-void scanTab(StudentP t, int length);   //creation du tableau
+StudentP scanTab(StudentP t, int length);   //creation du tableau
 void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
 
 
