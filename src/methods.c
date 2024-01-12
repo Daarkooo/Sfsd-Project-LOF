@@ -320,12 +320,12 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 IndexP InitTabIndex(LOF_fileP f, char file_name[]){
+    f = openLOF(f, file_name, 'o');
     int nb = readHeader(f, 3);
     IndexP tabIndex = malloc(sizeof(Index)*nb);
-    f = openLOF(f, file_name, 'o');
     int blockNum = readHeader(f, 1);
     int k=0; // k em case de la tabindex
-    while(blockNum!=1)
+    while(blockNum!=-1)
     {
         readBlock(f, blockNum, buffer);
         int i=0;

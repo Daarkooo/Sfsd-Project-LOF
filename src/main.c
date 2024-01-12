@@ -81,10 +81,10 @@ int main(int argc, char *argv[])
     scanf("%d",&n);
 
     createLOF(fichierLOF, "test.bin", n);
+    fichierLOF = openLOF(fichierLOF,"test.bin",'o');
     printTerminal(fichierLOF,"test.bin");
     tab = InitTabIndex(fichierLOF,"test.bin");
-    for(int i=0;i<n;i++){
-        printf("case %d- cle %d - adresse %d\n",i, tab[i].cle, tab[i].adr_block);
+    for(int i=0;i<readHeader(fichierLOF,3);i++){
     }
 
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     //     i++;
     // }
 
-    // closeLOF(fichierLOF);
+    closeLOF(fichierLOF);
 
 
     //---------------- FONCTIONS PAR ENCORE VÉRIFIÉS ---------------
