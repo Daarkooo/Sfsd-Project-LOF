@@ -15,8 +15,8 @@ void printStudent(StudentP S) {
     printf("Name : %s", S->name);
     printf("Surname : %s", S->surname);
     printf("Matricule : %d \n\n" , S->matricule );
-
 }
+
 
 void studentCopy(StudentP S1, StudentP S2) {
     strcpy(S1->name, S2->name);
@@ -184,6 +184,30 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
         (*buffer)->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
+
+void printTerminal(LOF_fileP f, char file_name[]){
+    f = openLOF(f, file_name, 'o');
+    IndexP tab = InitTabIndex(f,"test.bin");
+    int numBlock = readHeader(f, 1);
+    while (numBlock != -1)
+    {
+        readBlock(f, numBlock, buffer);
+        int i = 0;
+        int j = 0;
+        printf("\n\t----------BLOCK %d----------\n",numBlock);
+        for (int i = 0; i < buffer->NB; i++) {
+            printf("Student %d:\n", i + 1);
+            printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
+        }
+        
+        numBlock = buffer->svt;
+    }
+    for(int i=0;i<readHeader(f,3);i++){
+        printf("index %d - key %d - adresse %d\n",i,tab[i].cle,tab[i].adr_block);
+    }
+}
+
+
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
     FILE* studentWriter = fopen(result, "w"); 
@@ -191,6 +215,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     int i = 1;
     while (numBlock != -1)
     {
+        printTerminal(f,file_name);
         readBlock(f, numBlock, buffer);
         int i = 0;
         int j = 0;
@@ -203,6 +228,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
                 fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
                 j++;
             }
+            
             i++;
         }
         numBlock = buffer->svt;
@@ -211,7 +237,6 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     closeLOF(f);
     fclose(studentWriter);
 }
-
 
 
 StudentP scanTab(StudentP t, int length) {
@@ -248,7 +273,6 @@ void quickSortTab(StudentP tab, int start, int end) {
     quickSortTab(tab, start, i - 1);
     quickSortTab(tab, i + 1, end); 
 }   //trier le tableau en ordre croissant du matricule (la cle)
-
 
 
 void createLOF(LOF_fileP f, char file_name[], int N) {
@@ -299,8 +323,40 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     buffer->svt = -1;   //mettre le svt du dernier bloc a -1 (nil)
     writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
+    
     closeLOF(f);    //fermer le fichier    
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
+
+IndexP InitTabIndex(LOF_fileP f, char file_name[]){
+    f = openLOF(f, file_name, 'o');
+    int nb = readHeader(f, 3);
+    IndexP tabIndex = malloc(sizeof(Index)*nb);
+    int blockNum = readHeader(f, 1);
+    int k=0; // k em case de la tabindex
+    while(blockNum!=-1)
+    {
+        readBlock(f, blockNum, buffer);
+        int i=0;
+        int j=0;
+        while (i < MAX_E ){
+            if (buffer->tab[i].deleted == 0)
+            {
+                j++;
+            }
+            if(j == buffer->NB){
+                break;
+            }
+            i++;
+        }   
+        (tabIndex + k)->cle=buffer->tab[i].matricule;
+        (tabIndex + k)->adr_block=blockNum;
+        k++;
+        blockNum = buffer->svt;
+    }
+    
+    closeLOF(f);
+    return tabIndex;
+}
 
 
 void insertStudent(LOF_fileP f, char file_name[], StudentP student) {

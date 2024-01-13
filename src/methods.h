@@ -7,6 +7,14 @@
 #define MAX_E 6 // nombre maximum d'enregistrement dans un bloc
 #define LoadFact 0.5    // facteur de chargement
 
+// le type de la table d'index 
+
+typedef struct {
+    int cle;  // valeur de la cle
+    int adr_block; // adresse du block
+}Index, *IndexP;
+
+
 // declaration de l'enregistrement logique
 typedef struct Student
 {
@@ -78,9 +86,13 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]);     //afficher le
 StudentP scanTab(StudentP t, int length);   //creation du tableau
 void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
 
+// fun pour tester dans terminal
+void printTerminal(LOF_fileP f, char file_name[]); // print in terminal
+
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
+IndexP InitTabIndex(LOF_fileP f, char file_name[]);// initialisation de la table index
 void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
