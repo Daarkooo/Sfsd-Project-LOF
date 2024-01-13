@@ -420,7 +420,7 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
 } //suppression de l'enregistrement si il existe
 // 2024
 
-void SearchStudent(LOF_fileP f, char file_name[20], int matricule, int* BlockNB, int* PositionNB, int* exist) {
+void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB, int* exist) {
     f = openLOF(f,file_name,'o');
     *exist = 0; // Initialisation n'exist pas
     if(readHeader(f, 4) != 0){
