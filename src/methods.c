@@ -62,6 +62,8 @@ LOF_fileP openLOF(LOF_fileP f, char file_name[],char open_mode) {
     
     if (open_mode == 'o') {  // On ouvre le fichier en mode OLD 'o' (le fichier est ancien et existe deja)
         f->file = fopen(file_name, "rb+");
+        if (f->file == NULL)
+            return NULL;
         f->header = malloc(sizeof(header));
         fread(f->header, sizeof(header), 1, f->file);
         rewind(f->file);
@@ -185,6 +187,7 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 
 void printTerminal(LOF_fileP f, char file_name[]){
     f = openLOF(f, file_name, 'o');
+    IndexP tab = InitTabIndex(f,"test.bin");
     int numBlock = readHeader(f, 1);
     while (numBlock != -1)
     {
@@ -196,7 +199,11 @@ void printTerminal(LOF_fileP f, char file_name[]){
             printf("Student %d:\n", i + 1);
             printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
         }
+        
         numBlock = buffer->svt;
+    }
+    for(int i=0;i<readHeader(f,3);i++){
+        printf("index %d - key %d - adresse %d\n",i,tab[i].cle,tab[i].adr_block);
     }
 }
 
@@ -316,6 +323,7 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     buffer->svt = -1;   //mettre le svt du dernier bloc a -1 (nil)
     writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
+    
     closeLOF(f);    //fermer le fichier    
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
