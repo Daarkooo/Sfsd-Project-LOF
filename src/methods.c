@@ -185,37 +185,14 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
 
-void printTerminal(LOF_fileP f, char file_name[]){
-    f = openLOF(f, file_name, 'o');
-    IndexP tab = InitTabIndex(f,"test.bin");
-    int numBlock = readHeader(f, 1);
-    while (numBlock != -1)
-    {
-        readBlock(f, numBlock, buffer);
-        int i = 0;
-        int j = 0;
-        printf("\n\t----------BLOCK %d----------\n",numBlock);
-        for (int i = 0; i < buffer->NB; i++) {
-            printf("Student %d:\n", i + 1);
-            printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
-        }
-        
-        numBlock = buffer->svt;
-    }
-    for(int i=0;i<readHeader(f,3);i++){
-        printf("index %d - key %d - adresse %d\n",i,tab[i].cle,tab[i].adr_block);
-    }
-}
-
-
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
+    f->indexTab = InitTabIndex(f);
     FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i = 1;
     while (numBlock != -1)
     {
-        printTerminal(f,file_name);
         readBlock(f, numBlock, buffer);
         int i = 0;
         int j = 0;
@@ -232,6 +209,10 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
             i++;
         }
         numBlock = buffer->svt;
+    }
+
+    for(int i=0;i<readHeader(f,3);i++){
+        fprintf(studentWriter, "index %d - key %d - adresse %d\n",i,f->indexTab[i].lastKey,f->indexTab[i].blockID);
     }
 
     closeLOF(f);
@@ -273,6 +254,35 @@ void quickSortTab(StudentP tab, int start, int end) {
     quickSortTab(tab, start, i - 1);
     quickSortTab(tab, i + 1, end); 
 }   //trier le tableau en ordre croissant du matricule (la cle)
+
+IndexP InitTabIndex(LOF_fileP f){
+    int nb = readHeader(f, 3);
+    IndexP tabIndex = malloc(sizeof(Index)*nb);
+    int blockNum = readHeader(f, 1);
+    int k=0; // k em case de la tabindex
+    while(blockNum!=-1)
+    {
+        readBlock(f, blockNum, buffer);
+        int i=0;
+        int j=0;
+        while (i < MAX_E ){
+            if (buffer->tab[i].deleted == 0)
+            {
+                j++;
+            }
+            if(j == buffer->NB){
+                break;
+            }
+            i++;
+        }   
+        (tabIndex + k)->lastKey=buffer->tab[i].matricule;
+        (tabIndex + k)->blockID=blockNum;
+        k++;
+        blockNum = buffer->svt;
+    }
+    
+    return tabIndex;
+}
 
 
 void createLOF(LOF_fileP f, char file_name[], int N) {
@@ -324,39 +334,10 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
     
-    closeLOF(f);    //fermer le fichier    
-}     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
-
-IndexP InitTabIndex(LOF_fileP f, char file_name[]){
-    f = openLOF(f, file_name, 'o');
-    int nb = readHeader(f, 3);
-    IndexP tabIndex = malloc(sizeof(Index)*nb);
-    int blockNum = readHeader(f, 1);
-    int k=0; // k em case de la tabindex
-    while(blockNum!=-1)
-    {
-        readBlock(f, blockNum, buffer);
-        int i=0;
-        int j=0;
-        while (i < MAX_E ){
-            if (buffer->tab[i].deleted == 0)
-            {
-                j++;
-            }
-            if(j == buffer->NB){
-                break;
-            }
-            i++;
-        }   
-        (tabIndex + k)->cle=buffer->tab[i].matricule;
-        (tabIndex + k)->adr_block=blockNum;
-        k++;
-        blockNum = buffer->svt;
-    }
+    f->indexTab = InitTabIndex(f);  //initialiser le tableau d'index
+    closeLOF(f);    //fermer le fichier
     
-    closeLOF(f);
-    return tabIndex;
-}
+}     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 
 void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
@@ -474,29 +455,77 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
         }
     }
 } //suppression de l'enregistrement si il existe
-// 2024
 
-void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB, int* exist) {
+void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist) {
     f = openLOF(f,file_name,'o');
-    *exist = 0; // Initialisation n'exist pas
-    if(readHeader(f, 4) != 0){
-        int blockNum = readHeader(f, 1);    //initialiser avec le numero du premier bloc
-        while (blockNum != -1) {
-            readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
-            for (int i = 0; i < MAX_E; i++) {
-                if( buffer->tab[i].deleted != 1)
-                    continue;
-
-                if ((buffer->tab[i].matricule == matricule)) {
-                    *BlockNB = blockNum;
-                    *PositionNB = i;    //la position de bloc numero i
-                    *exist = 1; // Student exists
-                    return;
+    f->indexTab = InitTabIndex(f);  //initialisation du tableau d'index
+    *exist = 0; // Initialisation n'existe pas
+    *blockNB = 0;
+    *positionNB = 0;
+    if (readHeader(f, 4) != 0)  //verfier si le fichier contient des etudiants
+    {
+        int start = 0;
+        int end = readHeader(f, 3) - 1;
+        while ((end - start) > 1 && !(*exist)) {    //tant que taille(tab) > 2 cases
+            int m = (start + end) / 2;
+            if (f->indexTab[m].lastKey == matricule)    //la dernier cle du bloc est la cle qu'on cherche
+            {
+                *exist = 1;
+                *blockNB = f->indexTab[m].blockID;
+                readBlock(f, *blockNB, buffer);
+                int i = 0;
+                while (i < MAX_E)
+                {
+                    if (buffer->tab[i].deleted == 0 && buffer->tab[i].matricule == matricule)
+                        *positionNB = i + 1;
+                    i++;
+                }
+            } else if (f->indexTab[m].lastKey < matricule)  //la dernier cle du bloc est inferieur, on cherche dans les blocs suivants
+            {
+                start = m;
+            } else {    //la dernier cle du bloc est superieur, on cherche dans les blocs precedents
+                end = m;
+            }
+        }
+        if (*exist == 0)    //si la cle qu'on cherche n'est pas la derniere valeur de son bloc
+        {
+            readBlock(f, f->indexTab[end].blockID, buffer); //on cherche dans tab[fin]
+            int i = 0;
+            int j = 0;
+            while (i < MAX_E && j < buffer->NB)
+            {
+                if (buffer->tab[i].deleted == 0) {
+                    if (buffer->tab[i].matricule == matricule)
+                    {
+                        *exist = 1;
+                        *blockNB = f->indexTab[end].blockID;
+                        *positionNB = i + 1;
+                    }
+                    j++;
+                }
+                i++;
+            }
+            if (start != end && *exist == 0)
+            {
+                readBlock(f, f->indexTab[start].blockID, buffer); //si taille(tab = 2), et qu'on trouve pas dans tab[fin], on cherche dans tab[debut]
+                i = 0;
+                j = 0;
+                while (i < MAX_E && j < buffer->NB)
+                {
+                    if (buffer->tab[i].deleted == 0) {
+                        if (buffer->tab[i].matricule == matricule)
+                        {
+                            *exist = 1;
+                            *blockNB = f->indexTab[start].blockID;
+                            *positionNB = i + 1;
+                        }
+                        j++;
+                    }
+                    i++;
                 }
             }
-            blockNum = buffer->svt; //le numero de bloc suivant
-        }   //verification de tout les "students" dans un bloc
-    }   //verification de tout les blocs
+        }
+    }
     closeLOF(f);  // close the file
 }  //retourne le bloc, position de l'enregistrement s'il est trouve
 
