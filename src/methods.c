@@ -187,7 +187,7 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 
 void printTerminal(LOF_fileP f, char file_name[]){
     f = openLOF(f, file_name, 'o');
-    IndexP tab = InitTabIndex(f,"test.bin");
+    f->tabIndex= InitTabIndex(f);
     int numBlock = readHeader(f, 1);
     while (numBlock != -1)
     {
@@ -203,13 +203,14 @@ void printTerminal(LOF_fileP f, char file_name[]){
         numBlock = buffer->svt;
     }
     for(int i=0;i<readHeader(f,3);i++){
-        printf("index %d - key %d - adresse %d\n",i,tab[i].cle,tab[i].adr_block);
+        printf("index %d - key %d - adresse %d\n",i,f->tabIndex[i].cle,f->tabIndex[i].adr_block);
     }
 }
 
 
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
+    f->tabIndex =InitTabIndex(f);
     FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i = 1;
@@ -232,6 +233,9 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
             i++;
         }
         numBlock = buffer->svt;
+    }
+    for(int i=0;i<readHeader(f,3);i++){
+        fprintf(studentWriter,"index %d - key %d - adresse %d\n",i,f->tabIndex[i].cle,f->tabIndex[i].adr_block);
     }
 
     closeLOF(f);
@@ -323,12 +327,12 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     buffer->svt = -1;   //mettre le svt du dernier bloc a -1 (nil)
     writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
-    
+    f->tabIndex = InitTabIndex(f);
     closeLOF(f);    //fermer le fichier    
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
-IndexP InitTabIndex(LOF_fileP f, char file_name[]){
-    f = openLOF(f, file_name, 'o');
+IndexP InitTabIndex(LOF_fileP f){
+    // f = openLOF(f, file_name, 'o');
     int nb = readHeader(f, 3);
     IndexP tabIndex = malloc(sizeof(Index)*nb);
     int blockNum = readHeader(f, 1);
@@ -354,7 +358,7 @@ IndexP InitTabIndex(LOF_fileP f, char file_name[]){
         blockNum = buffer->svt;
     }
     
-    closeLOF(f);
+    // closeLOF(f);
     return tabIndex;
 }
 
@@ -456,7 +460,9 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 
 
 void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
+    f = openLOF(f,file_name, 'o');
     int n_bloc,position,find,x;
+    f->tabIndex=InitTabIndex(f);
     if(f->file){
         SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
         if(find){ // s'il existe
