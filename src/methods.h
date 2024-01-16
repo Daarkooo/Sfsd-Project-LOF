@@ -10,8 +10,8 @@
 // le type de la table d'index 
 
 typedef struct {
-    int cle;  // valeur de la cle
-    int adr_block; // adresse du block
+    int lastKey;  // valeur de la cle
+    int blockID; // adresse du block
 }Index, *IndexP;
 
 
@@ -63,6 +63,7 @@ typedef struct LOF_file
     headerP header;  //pointeur sur l'entete
     FILE* file; //le fichier physique
     IndexP tabIndex;
+    
 }LOF_file, *LOF_fileP;
 
 
@@ -86,19 +87,16 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]);     //afficher le
 //fonctions obligatoire pour le tableau initial
 StudentP scanTab(StudentP t, int length);   //creation du tableau
 void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
-
-// fun pour tester dans terminal
-void printTerminal(LOF_fileP f, char file_name[]); // print in terminal
+IndexP InitTabIndex(LOF_fileP f);// initialisation de la table index
 
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
-IndexP InitTabIndex(LOF_fileP f);// initialisation de la table index
 void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
 void DeleteStudent(LOF_fileP f, char file_name[], int matricule); //suppression de l'enregistrement si il existe
-void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
+void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
 void ModifyStudent(LOF_fileP f, char file_name[], int matricule, StudentP student);   //modifier le contenue de l'enregistrement s'il existe
 
 
