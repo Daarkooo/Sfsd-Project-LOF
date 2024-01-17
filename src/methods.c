@@ -437,31 +437,69 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
 }//insertion d'un novelle enregistrement dans le fichier
 
 
+// void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
+//     if((readHeader(f,4))!=0){
+//         int blockNum = readHeader(f,1);//initialiser avec le numero du premier bloc
+//         while (blockNum != -1) {
+//             readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
+//             for (int i = 0; (i < MAX_E); i++) {
+//                 if(buffer->tab[i].matricule > matricule ){ // trouver un matricule superieur 
+//                     while (i>0){
+//                         if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans le concept logique)
+//                             break;
+//                         }
+//                         i--;
+//                     }
+//                     *BlockNB = blockNum;
+//                     *PositionNB = i;
+//                     break;
+//                 } 
+//             }
+//             if(buffer->svt==-1){
+//                 *PositionNB = -1; // dans le cas ou on a depasse le dernier etudiant du dernier block 
+//             }   
+//             blockNum = buffer->svt;//le numero de bloc suivant
+//         }   
+//     }//verification de tout les blocs 
+// }// la recherche de la position ideale pour l'insertion
+
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
-    if((readHeader(f,4))!=0){
-        int blockNum = readHeader(f,1);//initialiser avec le numero du premier bloc
-        while (blockNum != -1) {
-            readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
-            for (int i = 0; (i < MAX_E); i++) {
-                if(buffer->tab[i].matricule > matricule ){ // trouver un matricule superieur 
-                    while (i>0){
-                        if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans le concept logique)
-                            break;
-                        }
-                        i--;
-                    }
-                    *BlockNB = blockNum;
-                    *PositionNB = i;
-                    break;
-                } 
+    f = openLOF(f,file_name,'o');
+    f->tabIndex = InitTabIndex(f);  //initialisation du tableau d'index
+
+    if (readHeader(f, 4) != 0)  //verfier si le fichier contient des etudiants
+    {
+        int start = 0;
+        int end = readHeader(f, 3) - 1;
+        while ((end - start) > 1) {    //tant que taille(tab) > 2 cases
+            int m = (start + end) / 2;
+            if (f->tabIndex[m].lastKey > matricule){    //la dernier cle du bloc est la cle qu'on cherche
+                end = m;
+            } 
+            else{
+                start = m;
+            }  //la dernier cle du bloc est inferieur, on cherche dans les blocs suivants   
+        }
+        printf("start = %d, end = %d\n", start+1, end+1);
+        if(f->tabIndex[start].lastKey>matricule){
+            *BlockNB = start+1;
+        }else{
+            *BlockNB = end+1;
+        }
+        printf("blockNB = %d\n", *BlockNB);
+        readBlock(f, *BlockNB, buffer);
+        int i = 0;
+        while (i < MAX_E && buffer->tab[i].matricule < matricule){
+            if (buffer->tab[i].deleted == 0){
+                *PositionNB = i + 1;
+                printf("positionNB = %d\n",*PositionNB);
             }
-            if(buffer->svt==-1){
-                *PositionNB = -1; // dans le cas ou on a depasse le dernier etudiant du dernier block 
-            }   
-            blockNum = buffer->svt;//le numero de bloc suivant
-        }   
-    }//verification de tout les blocs 
-}// la recherche de la position ideale pour l'insertion
+            i++;
+        }
+        
+    }
+    closeLOF(f);  // close the file
+}  //retourne le bloc, po
 
 
 void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[],int matricule) {

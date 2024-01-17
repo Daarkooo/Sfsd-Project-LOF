@@ -111,7 +111,22 @@ int main(int argc, char *argv[])
     //     }
     // } while (stop == 0);
     
+
     // ----------Delete fun test ---------------------------------
+    // LOF_fileP fichierLOF;
+    // int n;
+    // printf("Combien d'etudiant voulez vous inserez : ");
+    // scanf("%d",&n);
+
+    // int blockNB, posNB, existe;
+    // createLOF(fichierLOF, "hichem.bin", n);
+    // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+    // printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
+    // scanf("%d",&n);
+    // DeleteStudent(fichierLOF, "hichem.bin", "hichem.txt",n);
+    // printHeader(fichierLOF,"hichem.bin");
+
+    
     LOF_fileP fichierLOF;
     int n;
     printf("Combien d'etudiant voulez vous inserez : ");
@@ -119,13 +134,17 @@ int main(int argc, char *argv[])
 
     int blockNB, posNB, existe;
     createLOF(fichierLOF, "hichem.bin", n);
+
     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
+    printf("Quelle est le matricule de l'etudiant que vous voulez le inserer : ");
     scanf("%d",&n);
-    DeleteStudent(fichierLOF, "hichem.bin", "hichem.txt",n);
-    printHeader(fichierLOF,"hichem.bin");
+    SearchInsertionPosition(fichierLOF,"hichem.bin",n,&blockNB,&posNB);
+    printf("block: %d, pos: %d \n",blockNB,posNB);
+   
+    
+    // printHeader(fichierLOF,"hichem.bin");
 
 
-
+    closeLOF(fichierLOF);
     return 0;
 }
