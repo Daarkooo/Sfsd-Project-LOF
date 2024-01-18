@@ -267,24 +267,27 @@ int main(int argc, char *argv[])
     createLOF(fichierLOF, "test.bin", n);
     extractLOF(fichierLOF, "test.bin", "test.txt");
 
+    printf("\nMatricule a supprimer : ");
+    scanf("%d",&n);
+    DeleteStudent(fichierLOF, "test.bin", n);
 
-    fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
+    // fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
 
-    int x = readHeader(fichierLOF, 3);
-    int y;
-    IndexP tab = InitTabIndex(fichierLOF, &y);
-    printf("\nlength == %d\n", y);
-    writeIndexTab(fichierLOF, tab, y, x);
-    IndexP tab2;
-    readIndexTab(fichierLOF, tab2, y, x);
-    for (int i = 0; i < x; i++)
-    {
-        printf("\n%3d %3d\n", tab2[i].blockID, tab2[i].lastKey);
-    }
+    // int x = readHeader(fichierLOF, 3);
+    // int y;
+    // IndexP tab = InitTabIndex(fichierLOF, &y);
+    // printf("\nlength == %d\n", y);
+    // writeIndexTab(fichierLOF, tab, y, x);
+    // IndexP tab2;
+    // readIndexTab(fichierLOF, tab2, y, x);
+    // for (int i = 0; i < x; i++)
+    // {
+    //     printf("\n%3d %3d\n", tab2[i].blockID, tab2[i].lastKey);
+    // }
     
 
 
-    closeLOF(fichierLOF);
+    // closeLOF(fichierLOF);
     
 
     return 0;

@@ -453,23 +453,46 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 
 
 void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
+    f = openLOF(f,file_name, 'o');
     int n_bloc,position,find,x;
-    if(f->file){
-        SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
-        if(find){ // s'il existe
-            f = openLOF(f,file_name,'o');
-            readBlock(f,n_bloc,buffer); // lire le n_bloc
-            buffer->tab[position].deleted=1; // deleted = true
-            buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
-            x = readHeader(f, 4); // lire le nbr d'etudiant
-            x--; 
-            writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
-            writeBlock(f,n_bloc,buffer); // saving
-            closeLOF(f);  // close the file
-        }else{  // doesn't exist
+    int length;
+    f->indexTab = InitTabIndex(f, &length);
+    SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
+    if(find){ 
+        position--;
+        readBlock(f,n_bloc,buffer); // lire le n_bloc
+        buffer->tab[position].deleted=1; // deleted = true
+        buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
+        x = readHeader(f, 4); // lire le nbr d'etudiant
+        x--; 
+        writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
+        writeBlock(f,n_bloc,buffer); // saving
+
+        f->indexTab = InitTabIndex(f, &length);
+        extractLOF(f,file_name, "test.txt");
+        closeLOF(f);  // close the file
+    }else{  // doesn't exist
             printf("ce matricule n'existe pas.");
-        }
     }
+
+
+    // int n_bloc,position,find,x;
+    // if(f->file){
+    //     SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
+    //     if(find){ // s'il existe
+    //         f = openLOF(f,file_name,'o');
+    //         readBlock(f,n_bloc,buffer); // lire le n_bloc
+    //         buffer->tab[position].deleted=1; // deleted = true
+    //         buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
+    //         x = readHeader(f, 4); // lire le nbr d'etudiant
+    //         x--; 
+    //         writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
+    //         writeBlock(f,n_bloc,buffer); // saving
+    //         closeLOF(f);  // close the file
+    //     }else{  // doesn't exist
+    //         printf("ce matricule n'existe pas.");
+    //     }
+    // }
 } //suppression de l'enregistrement si il existe
 
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist) {
