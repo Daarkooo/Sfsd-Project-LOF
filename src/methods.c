@@ -187,7 +187,8 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
-    f->indexTab = InitTabIndex(f);
+    int x;
+    f->indexTab = InitTabIndex(f, &x);
     FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i = 1;
@@ -255,7 +256,8 @@ void quickSortTab(StudentP tab, int start, int end) {
     quickSortTab(tab, i + 1, end); 
 }   //trier le tableau en ordre croissant du matricule (la cle)
 
-IndexP InitTabIndex(LOF_fileP f){
+
+IndexP InitTabIndex(LOF_fileP f, int *length){
     int nb = readHeader(f, 3);
     IndexP tabIndex = malloc(sizeof(Index)*nb);
     int blockNum = readHeader(f, 1);
@@ -280,9 +282,21 @@ IndexP InitTabIndex(LOF_fileP f){
         k++;
         blockNum = buffer->svt;
     }
-    
+    *length = k;
     return tabIndex;
 }
+
+void writeIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks) {
+    fseek(f->file, sizeof(header) + (sizeof(block)*nbBlocks), SEEK_SET);
+    fwrite(tab, sizeof(Index), length, f->file);
+    rewind(f->file);
+}  //mettre le contenue du tampon dans le bloc numero K
+
+void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks) {
+    fseek(f->file, sizeof(header) + (sizeof(block)*nbBlocks), SEEK_SET);
+    fread(tab, sizeof(Index), length, f->file);
+    rewind(f->file);
+}  //mettre le contenue du bloc numero K dans
 
 
 void createLOF(LOF_fileP f, char file_name[], int N) {
@@ -334,7 +348,9 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     writeBlock(f, k, buffer);    //ecriture du dernier buffer dans le fichier
     writeHeader(f, 4, N);   //nombre d'enregistrement dans le fichier
     
-    f->indexTab = InitTabIndex(f);  //initialiser le tableau d'index
+    int x;
+    f->indexTab = InitTabIndex(f, &x);  //initialiser le tableau d'index
+
     closeLOF(f);    //fermer le fichier
     
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
@@ -458,7 +474,8 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
 
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist) {
     f = openLOF(f,file_name,'o');
-    f->indexTab = InitTabIndex(f);  //initialisation du tableau d'index
+    int x;
+    f->indexTab = InitTabIndex(f, &x);  //initialisation du tableau d'index
     *exist = 0; // Initialisation n'existe pas
     *blockNB = 0;
     *positionNB = 0;
