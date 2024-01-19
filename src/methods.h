@@ -86,7 +86,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]);     //afficher le
 //fonctions obligatoire pour le tableau initial
 StudentP scanTab(StudentP t, int length);   //creation du tableau
 void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
-IndexP InitTabIndex(LOF_fileP f, int *length);  // initialisation de la table index
+IndexP InitTabIndex(LOF_fileP f);  // initialisation de la table index
 void writeIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre le contenue du tampon dans le bloc numero K
 void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre le contenue du bloc numero K dans
 
@@ -95,7 +95,7 @@ void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre 
 void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
-void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[], int matricule); //suppression de l'enregistrement si il existe
+void DeleteStudent(LOF_fileP f, char file_name[], int matricule); //suppression de l'enregistrement si il existe
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
 void ModifyStudent(LOF_fileP f, char file_name[], int matricule, StudentP student);   //modifier le contenue de l'enregistrement s'il existe
 
