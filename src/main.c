@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 
     printf("\nMatricule a supprimer : ");
     scanf("%d",&n);
-    DeleteStudent(fichierLOF, "test.bin", n);
+    DeleteStudent(fichierLOF, "test.bin", n, "test.txt");
 
     // fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
 

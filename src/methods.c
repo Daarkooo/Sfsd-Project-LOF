@@ -192,27 +192,32 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i = 1;
+    int k = 0;
     while (numBlock != -1)
     {
         readBlock(f, numBlock, buffer);
-        int i = 0;
-        int j = 0;
-        fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
-        while (i < MAX_E && j < buffer->NB)
+        if (buffer->NB != 0)
         {
-            if (buffer->tab[i].deleted == 0)
+            int i = 0;
+            int j = 0;
+            fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
+            while (i < MAX_E && j < buffer->NB)
             {
-                fprintf(studentWriter, "Student %d:\n", i + 1);
-                fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
-                j++;
+                if (buffer->tab[i].deleted == 0)
+                {
+                    fprintf(studentWriter, "Student %d:\n", i + 1);
+                    fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
+                    j++;
+                }
+
+                i++;
             }
-            
-            i++;
+            k++;
         }
         numBlock = buffer->svt;
     }
 
-    for(int i=0;i<readHeader(f,3);i++){
+    for(int i=0;i<k;i++){
         fprintf(studentWriter, "index %d - key %d - adresse %d\n",i,f->indexTab[i].lastKey,f->indexTab[i].blockID);
     }
 
@@ -452,7 +457,7 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 }// la recherche de la position ideale pour l'insertion
 
 
-void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
+void DeleteStudent(LOF_fileP f, char file_name[], int matricule, char result[]) {
     f = openLOF(f,file_name, 'o');
     int n_bloc,position,find,x;
     int length;
@@ -469,12 +474,13 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
         writeBlock(f,n_bloc,buffer); // saving
 
         f->indexTab = InitTabIndex(f, &length);
-        extractLOF(f,file_name, "test.txt");
-        closeLOF(f);  // close the file
+        
     }else{  // doesn't exist
-            printf("ce matricule n'existe pas.");
+            printf("ce matricule n'existe pas.\n");
     }
 
+    closeLOF(f);  // close the file
+    extractLOF(f,file_name, "test.txt");
 
     // int n_bloc,position,find,x;
     // if(f->file){
