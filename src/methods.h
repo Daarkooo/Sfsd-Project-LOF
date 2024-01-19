@@ -87,8 +87,9 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]);     //afficher le
 //fonctions obligatoire pour le tableau initial
 StudentP scanTab(StudentP t, int length);   //creation du tableau
 void quickSortTab(StudentP tab, int start, int end);   //trier le tableau en ordre croissant du matricule (la cle)
-IndexP InitTabIndex(LOF_fileP f);// initialisation de la table index
-
+IndexP InitTabIndex(LOF_fileP f, int *length);  // initialisation de la table index
+void writeIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre le contenue du tampon dans le bloc numero K
+void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre le contenue du bloc numero K dans
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
