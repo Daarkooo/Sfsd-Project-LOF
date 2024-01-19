@@ -480,7 +480,7 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule, char result[]) 
     }
 
     closeLOF(f);  // close the file
-    extractLOF(f,file_name, "test.txt");
+    extractLOF(f,file_name, result);
 
     // int n_bloc,position,find,x;
     // if(f->file){
