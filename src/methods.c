@@ -433,6 +433,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
             writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
         }
     }
+    
     closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
 

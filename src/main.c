@@ -129,6 +129,9 @@ int main(int argc, char *argv[])
     
     LOF_fileP fichierLOF;
     int n;
+    StudentP student;
+    createStudent(student);
+    printStudent(student);
     printf("Combien d'etudiant voulez vous inserez : ");
     scanf("%d",&n);
 
@@ -138,7 +141,7 @@ int main(int argc, char *argv[])
     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
     printf("Quelle est le matricule de l'etudiant que vous voulez le inserer : ");
     scanf("%d",&n);
-    SearchInsertionPosition(fichierLOF,"hichem.bin",n,&blockNB,&posNB);
+    insertStudent(fichierLOF,"hichem.bin",student);
     printf("block: %d, pos: %d \n",blockNB,posNB);
    
     
