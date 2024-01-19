@@ -385,7 +385,6 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student) {
     int find,findIt,i,j,position,n_block,x,mat=1;
     blockP newBlock;
-
     f->tabIndex = InitTabIndex(f);
     f = openLOF(f,file_name,'o');
     SearchStudent(f,file_name,student->matricule,&i,&j,&find); // on cherche le matricule si il existe
@@ -398,8 +397,8 @@ void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP stud
 
     SearchInsertionPosition(f,file_name,student->matricule,&i,&j);
     
+    allocBlock(f, &x, &newBlock);
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
-        allocBlock(f, &x, &newBlock); // allouer a nv block
         studentCopy(newBlock->tab, student);
         n_block=readHeader(f,2);
         readBlock(f,n_block,buffer);
@@ -408,34 +407,34 @@ void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP stud
         writeHeader(f,2,x); // ====
         writeHeader(f,3,readHeader(f,3)+1); // mise a jour du header nmbr de blocks
         writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+
     }else{ 
-        allocBlock(f, &x, &newBlock);
         readBlock(f,i,buffer);
         if(buffer->tab[j].deleted){ // si la case est deja suprime (concept logique)
             studentCopy((buffer->tab) + j, student); // mettre le contenu de student dans le buffer qui porte le contenu de la case j du block i
             writeBlock(f,i,buffer); // l'ecrire dans le fichier 
             writeHeader(f,4,readHeader(f,4)+1);// student + 1 (header)
         }else{ // faire le decalge (en 2 moitie)
-            int m=FACT_B/2 ; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+            int m=FACT_B/2 -1; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
             if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
                 newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
                 for(int p=m;p>j;p--){
                 buffer->tab[p]= buffer->tab[p-1]; // decalage 
                 }
                 studentCopy((buffer->tab) + j, student);
-                for(int p=1;p<=m;p++){
+                for(int p=1;p<=m+1;p++){
                     newBlock->tab[p]=buffer->tab[p+m]; // remplire le rest du nv block ave la 2em moitie du iem block
                     buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
                 }
             }else{ // si la case ou on vas inserer se trouve dans la deuxieme moitie
                 int indexnv=j-m-1;
                 studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
-                for(int p=0;p<=m;p++){
+                for(int p=0;p<m;p++){
                     if(p==indexnv){ // passer a la prochaine case cuz we have already put our new student here
                         continue;
                     }
-                    newBlock->tab[p]=buffer->tab[p+m]; //
-                    buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
+                    newBlock->tab[p]=buffer->tab[p+m+1]; //
+                    buffer->tab[p+m+1].deleted=1; // la case deplace dans le nv block on la supprime du i em block
                 }
 
             }
@@ -446,10 +445,8 @@ void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP stud
             writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
         }
     }
-    printHeader(f,file_name);
-    f->tabIndex = InitTabIndex(f,&length);
+    
     extractLOF(f,file_name,file_txt);
-
     closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
 
@@ -459,8 +456,11 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 
     if (readHeader(f, 4) != 0)  //verfier si le fichier contient des etudiants
     {
+        printf("number of blocks: %d\n",readHeader(f,3));
         int start = 0;
         int end = readHeader(f, 3) - 1;
+        printf("number of blocks-end: %d\n",end);
+
         while ((end - start) > 1) {    //tant que taille(tab) > 2 cases
             int m = (start + end) / 2;
             if (f->tabIndex[m].lastKey > matricule){    // la dernier cle du bloc est la cle qu'on cherche
@@ -479,18 +479,32 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
         printf("blockNB = %d\n", *BlockNB);
         readBlock(f, *BlockNB, buffer);
         int i = 0;
-        while (i < FACT_B && buffer->tab[i].matricule < matricule){
-            i++;
+        if((buffer->svt) !=-1){
+            while (i < FACT_B && buffer->tab[i].matricule < matricule){
+                i++;
+            }
+        }else{
+            printf("lastkey = %d",f->tabIndex[*BlockNB-1].lastKey);
+            if(buffer->NB==0){
+                i=0;
+            }
+            else{
+                while (buffer->tab[i].matricule<matricule &&  buffer->tab[i].matricule != f->tabIndex[*BlockNB-1].lastKey ){
+                    i++;
+                }
+                if( buffer->tab[i].matricule<matricule && buffer->tab[i].matricule==f->tabIndex[*BlockNB-1].lastKey){
+                    i++;
+                }
+                if(i>=FACT_B){
+                    i==-1;
+                }
+            }
         }
         *PositionNB = i;
-        if((buffer->tab[i-1].matricule < matricule) && (buffer->svt== -1)) // dans le cas ou on a depasse le dernier etudiant dans le dernier block
-        { 
-            *PositionNB = -1;
-        }
+        printf("\npositionNB of insertion= %d\n\n", i+1);
     }
-
     closeLOF(f);  // close the file
-}  //retourne le bloc, po
+}
 
 
 
