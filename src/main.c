@@ -69,18 +69,15 @@ int main(int argc, char *argv[])
                     case 2:
                             printf("enter student ID: ");
                             scanf("%d", &id);
-                            printf("%s\n", ch1);
                             DeleteStudent(fichierLOF,ch1,ch2,id);
-                            printf("\nVous pouvez verifier la suppression dans votre fichier : %s\n", ch2);
                         break;
                     case 3:
                         char trompe;
                         do
                         {
-                            printf("\nEntrez le matricule de l'etudiant que vous cherchez : ");
+                            printf("Entrez le matricule de l'etudiant que vous cherchez : ");
                             scanf("%d",&n);
-                            // SearchStudent(fichierLOF, "test.bin", n, &blockNB, &posNB, &existe);
-                            existe=2;
+                            SearchStudent(fichierLOF, "test.bin", n, &blockNB, &posNB, &existe);
                             if (existe == 1){
                                 printf("\nETUDIANT TROUVE :\nBlock : %d\nPosition : %d\n", blockNB, posNB);
                                 break;}
@@ -109,7 +106,7 @@ int main(int argc, char *argv[])
                     stop = 1;
                     break;
                 default:
-                    printf("\nYOU CHOOSED A WRONG OPTION !\n");
+                    printf("YOU CHOOSED A WRONG OPTION !\n");
                     break;
             }
         }else{

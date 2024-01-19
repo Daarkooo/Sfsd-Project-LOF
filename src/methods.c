@@ -215,6 +215,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     FILE* studentWriter = fopen(result, "w"); 
     int numBlock = readHeader(f, 1);
     int i;
+    int k=0;
     int num;
     while (numBlock != -1)
     {
@@ -236,11 +237,12 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
                 
                 i++;
             }
+            k++;
         }
         numBlock = buffer->svt;
     }
-
-    for(int i=0;i<readHeader(f,3);i++){
+    printf("\n");
+    for(int i=0;i<k;i++){
         fprintf(studentWriter, "index %d - key %d - adresse %d\n",i,f->tabIndex[i].lastKey,f->tabIndex[i].blockID);
     }
 
@@ -521,24 +523,30 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 
 void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[],int matricule) {
     f = openLOF(f,file_name, 'o');
-    int n_bloc,position,find,x;
-    int length;
-    f->tabIndex=InitTabIndex(f, &length);
-    SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
-    if(find){ 
-        position--;
-        readBlock(f,n_bloc,buffer); // lire le n_bloc
-        buffer->tab[position].deleted=1; // deleted = true
-        buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
-        x = readHeader(f, 4); // lire le nbr d'etudiant
-        x--; 
-        writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
-        writeBlock(f,n_bloc,buffer); // saving
-
+    if(readHeader(f,4)!=0){
+        int n_bloc,position,find,x;
+        int length;
         f->tabIndex=InitTabIndex(f, &length);
-        extractLOF(f,file_name,file_txt);
-    }else{  // doesn't exist
-            printf("ce matricule n'existe pas. \n");
+        SearchStudent(f, file_name, matricule,&n_bloc,&position,&find); // la recherche
+        if(find){ 
+            position--;
+            readBlock(f,n_bloc,buffer); // lire le n_bloc
+            buffer->tab[position].deleted=1; // deleted = true
+            buffer->NB--; // decrementer le nbr d'enregistrmnt logic dans le n_bloc
+            x = readHeader(f, 4); // lire le nbr d'etudiant
+            x--; 
+            writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
+            writeBlock(f,n_bloc,buffer); // saving
+
+            f->tabIndex=InitTabIndex(f, &length);
+            extractLOF(f,file_name,file_txt);
+            printf("\nVous pouvez verifier la suppression dans votre fichier : %s\n", file_txt);
+        }else{  // doesn't exist
+                printf("\nCe matricule n'existe pas. \n");
+        }
+    }
+    else{
+        printf("\nCe fichier est vide! la suppression eset impossible!!\n");
     }
     closeLOF(f);  // close the file
 } //suppression de
