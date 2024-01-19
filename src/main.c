@@ -47,7 +47,9 @@ int main(int argc, char *argv[])
                 printf("\n\t---- Editing an old file ----");
                 printf("\nWhat's the name of your file : ");
                 scanf("%s", ch1);
+                strcpy(ch2, ch1);
                 strcat(ch1, ".bin");
+                strcat(ch2, ".txt");
                 if (openLOF(fichierLOF, ch1, 'o') == NULL)
                 {
                     printf("\nYOUR FILE DOESN'T EXIST\n");
@@ -68,7 +70,8 @@ int main(int argc, char *argv[])
                 case 2:
                     printf("\nEntrez le matricule de l'etudiant a supprimer : ");
                     scanf("%d",&n);
-                    DeleteStudent(fichierLOF, ch1, n, ch2);
+                    DeleteStudent(fichierLOF, ch1, n);
+                    extractLOF(fichierLOF, ch1, ch2);
                     printf("\nVous pouvez verifier la suppression dans votre fichier : %s\n", ch2);
                     break;
                 case 3:

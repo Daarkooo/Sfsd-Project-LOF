@@ -159,7 +159,7 @@ void writeBlock(LOF_fileP f, int K, blockP buffer) {
 }  //mettre le contenue du tampon dans le bloc numero K
 
 void readBlock(LOF_fileP f, int K, blockP buffer){
-
+    
     // Se deplacer a la position du bloc dans le fichier
     fseek(f->file, sizeof(header) + (K-1) * sizeof(block), SEEK_SET);
     // Lire le contenu du bloc dans le buffer
@@ -269,6 +269,8 @@ IndexP InitTabIndex(LOF_fileP f, int *length){
     int k=0; // k em case de la tabindex
     while(blockNum!=-1)
     {
+        printf("\n%p\n%p\n", buffer, f->file);
+        buffer = malloc(sizeof(block));
         readBlock(f, blockNum, buffer);
         int i=0;
         int j=0;
@@ -457,7 +459,7 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
 }// la recherche de la position ideale pour l'insertion
 
 
-void DeleteStudent(LOF_fileP f, char file_name[], int matricule, char result[]) {
+void DeleteStudent(LOF_fileP f, char file_name[], int matricule) {
     f = openLOF(f,file_name, 'o');
     int n_bloc,position,find,x;
     int length;
@@ -480,7 +482,6 @@ void DeleteStudent(LOF_fileP f, char file_name[], int matricule, char result[]) 
     }
 
     closeLOF(f);  // close the file
-    extractLOF(f,file_name, result);
 
     // int n_bloc,position,find,x;
     // if(f->file){
