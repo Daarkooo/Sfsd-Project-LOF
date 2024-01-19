@@ -180,7 +180,7 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
     strcpy(s.name, " ");
     strcpy(s.surname, " ");
     s.matricule = 0;
-    for (int i = 0; i < MAX_E; i++)
+    for (int i = 0; i < FACT_B; i++)
         (*buffer)->tab[i] = s; //initialiser toute les position du bloc avec un etudiant NULL
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
@@ -225,7 +225,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
             int j = 0;
             int num=1;
             fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
-            while (i < MAX_E && j < buffer->NB)
+            while (i < FACT_B && j < buffer->NB)
             {
                 if (buffer->tab[i].deleted == 0)
                 {
@@ -296,7 +296,7 @@ IndexP InitTabIndex(LOF_fileP f, int *length){
         readBlock(f, blockNum, buffer);
         int i=0;
         int j=0;
-        while (i < MAX_E ){
+        while (i < FACT_B ){
             if (buffer->tab[i].deleted == 0)
             {
                 j++;
@@ -345,7 +345,7 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 
     int i = 0;
     int j = 0;
-    while (i < N && i < MAX_E * LoadFact)   //remplire le premier bloc
+    while (i < N && i < FACT_B )   //remplire le premier bloc
     {
         studentCopy((buffer->tab) + j, StudentTab + i);
         i++;
@@ -354,7 +354,7 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 
     while (i < N)
     {
-        if (j < MAX_E * LoadFact)  //tester si le compteur est inferieur a 50% de la capacite max du bloc
+        if (j < FACT_B )  //tester si le compteur est inferieur a 50% de la capacite max du bloc
         {
             studentCopy((buffer->tab) + j, StudentTab + i);  //on reste dans le meme bloc  
             j++;
@@ -385,12 +385,12 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 
-void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
+void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student) {
     int find,findIt,i,j,position,n_block,x,mat=1;
     blockP newBlock;
-
+    int length;
+    f->tabIndex = InitTabIndex(f, &length);
     f = openLOF(f,file_name,'o');
-    // si le fichier existe
     SearchStudent(f,file_name,student->matricule,&i,&j,&find); // on cherche le matricule si il existe
     while (find) { // si il existe on boucle jusqu'a lustilisateur saisit un matricule qui n'existe pas
         printf("Ce matricule existe deja.\n");
@@ -420,7 +420,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
             writeBlock(f,i,buffer); // l'ecrire dans le fichier 
             writeHeader(f,4,readHeader(f,4)+1);// student + 1 (header)
         }else{ // faire le decalge (en 2 moitie)
-            int m=MAX_E/2 -1; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+            int m=FACT_B/2 -1; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
             if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
                 newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
                 for(int p=m;p>j;p--){
@@ -451,35 +451,9 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
         }
     }
     
+    extractLOF(f,file_name,file_txt);
     closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
-
-
-// void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
-//     if((readHeader(f,4))!=0){
-//         int blockNum = readHeader(f,1);//initialiser avec le numero du premier bloc
-//         while (blockNum != -1) {
-//             readBlock(f, blockNum, buffer); // mettre le contenue de fichier f dans un buffer
-//             for (int i = 0; (i < MAX_E); i++) {
-//                 if(buffer->tab[i].matricule > matricule ){ // trouver un matricule superieur 
-//                     while (i>0){
-//                         if(buffer->tab[i].deleted==0){ //  trouver la case supprimer (elle se trouve aprs le precedent etudint dans le concept logique)
-//                             break;
-//                         }
-//                         i--;
-//                     }
-//                     *BlockNB = blockNum;
-//                     *PositionNB = i;
-//                     break;
-//                 } 
-//             }
-//             if(buffer->svt==-1){
-//                 *PositionNB = -1; // dans le cas ou on a depasse le dernier etudiant du dernier block 
-//             }   
-//             blockNum = buffer->svt;//le numero de bloc suivant
-//         }   
-//     }//verification de tout les blocs 
-// }// la recherche de la position ideale pour l'insertion
 
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
     f = openLOF(f,file_name,'o');
@@ -508,7 +482,7 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
         printf("blockNB = %d\n", *BlockNB);
         readBlock(f, *BlockNB, buffer);
         int i = 0;
-        while (i < MAX_E && buffer->tab[i].matricule < matricule){
+        while (i < FACT_B && buffer->tab[i].matricule < matricule){
             if (buffer->tab[i].deleted == 0){
                 *PositionNB = i + 1;
                 printf("positionNB = %d\n",*PositionNB);
@@ -546,7 +520,7 @@ void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[],int matricule)
         }
     }
     else{
-        printf("\nCe fichier est vide! la suppression eset impossible!!\n");
+        printf("\nCe fichier est vide! la suppression est impossible!!\n");
     }
     closeLOF(f);  // close the file
 } //suppression de
@@ -570,7 +544,7 @@ void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, i
                 *blockNB = f->tabIndex[m].blockID;
                 readBlock(f, *blockNB, buffer);
                 int i = 0;
-                while (i < MAX_E)
+                while (i < FACT_B)
                 {
                     if (buffer->tab[i].deleted == 0 && buffer->tab[i].matricule == matricule)
                         *positionNB = i + 1;
@@ -588,7 +562,7 @@ void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, i
             readBlock(f, f->tabIndex[end].blockID, buffer); //on cherche dans tab[fin]
             int i = 0;
             int j = 0;
-            while (i < MAX_E && j < buffer->NB)
+            while (i < FACT_B && j < buffer->NB)
             {
                 if (buffer->tab[i].deleted == 0) {
                     if (buffer->tab[i].matricule == matricule)
@@ -606,7 +580,7 @@ void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, i
                 readBlock(f, f->tabIndex[start].blockID, buffer); //si taille(tab = 2), et qu'on trouve pas dans tab[fin], on cherche dans tab[debut]
                 i = 0;
                 j = 0;
-                while (i < MAX_E && j < buffer->NB)
+                while (i < FACT_B && j < buffer->NB)
                 {
                     if (buffer->tab[i].deleted == 0) {
                         if (buffer->tab[i].matricule == matricule)

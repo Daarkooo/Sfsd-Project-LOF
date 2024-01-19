@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_E 6 // nombre maximum d'enregistrement dans un bloc
-#define LoadFact 0.5    // facteur de chargement
+#define FACT_B 3 // facteur de blocage 
 
 // le type de la table d'index 
 
@@ -36,7 +35,7 @@ void createStudent(StudentP S); // lire les informations d'un etudiant
 // declaration du bloc
 typedef struct block
 {
-    Student tab[MAX_E]; // tableau d'enregistrement logique
+    Student tab[FACT_B]; // tableau d'enregistrement logique
     int NB;             // nombre d'enregistrement logique (case) dans chaque bloc
     int svt;
 } block, *blockP;
@@ -94,7 +93,7 @@ void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
 void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
-void insertStudent(LOF_fileP f, char file_name[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
+void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
 void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[], int matricule); //suppression de l'enregistrement si il existe
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
