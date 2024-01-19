@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     int blockNB, posNB, existe;
     do
     {
+        main_menu:
         printf("\n\t---- MAIN MENU ----");
         printf("\n1- Create a new LOF file");
         printf("\n2- Edit an existing LOF file");
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
                         printf("enter student ID: ");
                         scanf("%d", &id);
                         printf("%s\n", ch1);
-                        DeleteStudent(fichierLOF,ch1,id);
+                        DeleteStudent(fichierLOF,ch1,ch2,id);
                         printf("\nVous pouvez verifier la suppression dans votre fichier : %s\n", ch2);
                     break;
                 case 3:
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
                     break;
                 case 4:
 
+                    break;
+                
+                case 5:
+                    goto main_menu;
                     break;
                 
                 default:
@@ -125,22 +130,22 @@ int main(int argc, char *argv[])
     // printHeader(fichierLOF,"hichem.bin");
 
     
-    LOF_fileP fichierLOF;
-    int n;
-    StudentP student;
-    createStudent(student);
-    printStudent(student);
-    printf("Combien d'etudiant voulez vous inserez : ");
-    scanf("%d",&n);
+    // LOF_fileP fichierLOF;
+    // int n;
+    // StudentP student;
+    // createStudent(student);
+    // printStudent(student);
+    // printf("Combien d'etudiant voulez vous inserez : ");
+    // scanf("%d",&n);
 
-    int blockNB, posNB, existe;
-    createLOF(fichierLOF, "hichem.bin", n);
+    // int blockNB, posNB, existe;
+    // createLOF(fichierLOF, "hichem.bin", n);
 
-    extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    printf("Quelle est le matricule de l'etudiant que vous voulez le inserer : ");
-    scanf("%d",&n);
-    insertStudent(fichierLOF,"hichem.bin",student);
-    printf("block: %d, pos: %d \n",blockNB,posNB);
+    // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+    // printf("Quelle est le matricule de l'etudiant que vous voulez le inserer : ");
+    // scanf("%d",&n);
+    // insertStudent(fichierLOF,"hichem.bin",student);
+    // printf("block: %d, pos: %d \n",blockNB,posNB);
    
     
     // printHeader(fichierLOF,"hichem.bin");

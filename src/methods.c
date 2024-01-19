@@ -481,7 +481,8 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
 
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
     f = openLOF(f,file_name,'o');
-    f->tabIndex = InitTabIndex(f);  //initialisation du tableau d'index
+    int length;
+    f->tabIndex = InitTabIndex(f,&length);  //initialisation du tableau d'index
 
     if (readHeader(f, 4) != 0)  //verfier si le fichier contient des etudiants
     {
@@ -534,18 +535,18 @@ void DeleteStudent(LOF_fileP f, char file_name[], char file_txt[],int matricule)
         writeHeader(f,4,x); // decrementer le nbr d'etudiant dns le header
         writeBlock(f,n_bloc,buffer); // saving
 
-        f->tabIndex=InitTabIndex(f);
+        f->tabIndex=InitTabIndex(f, &length);
         extractLOF(f,file_name,file_txt);
     }else{  // doesn't exist
-            printf("ce matricule n'existe pas.");
+            printf("ce matricule n'existe pas. \n");
     }
     closeLOF(f);  // close the file
 } //suppression de
 
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist) {
     f = openLOF(f,file_name,'o');
-    int x;
-    f->tabIndex = InitTabIndex(f, &x);  //initialisation du tableau d'index
+    int length;
+    f->tabIndex = InitTabIndex(f,&length);//initialisation du tableau d'index
     *exist = 0; // Initialisation n'existe pas
     *blockNB = 0;
     *positionNB = 0;
@@ -613,6 +614,7 @@ void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, i
             }
         }
     }
+    f->tabIndex= InitTabIndex(f, &length);
     closeLOF(f);  // close the file
 }  //retourne le bloc, position de l'enregistrement s'il est trouve
 
