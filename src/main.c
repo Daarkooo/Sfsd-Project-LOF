@@ -124,36 +124,57 @@ int main(int argc, char *argv[])
 
     // ----------Delete fun test ---------------------------------
     // LOF_fileP fichierLOF= openLOF(fichierLOF,"hichem.bin",'o');
+    // printf("First Block: %d\n", fichierLOF->header->firstBlock);
+    // printf("Last Block: %d\n", fichierLOF->header->lastBlock);
+    // printf("Number of Blocks: %d\n", fichierLOF->header->nbBlocks);
+    // printf("Number of Students: %d\n", fichierLOF->header->nbStudents);
+
     // int n;
     // printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
     // scanf("%d",&n);
     // DeleteStudent(fichierLOF, "hichem.bin",n);
     // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+    // printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
+    // scanf("%d",&n);
+    // DeleteStudent(fichierLOF, "hichem.bin",n);
+    // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+
+
+    LOF_fileP fichierLOF;
+    createLOF(fichierLOF, "test.bin",8);
+    extractLOF(fichierLOF, "test.bin","test.txt");
+    printHeader(fichierLOF,"test.bin");
+    int n;
+    printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
+    scanf("%d",&n);
+    DeleteStudent(fichierLOF, "test.bin",n);
+    extractLOF(fichierLOF, "test.bin", "test.txt");
     // printHeader(fichierLOF,"hichem.bin");
 
     
-    // ----------InsertSearch fun test ---------------------------------
-    LOF_fileP fichierLOF;
-    int n;
+    // ----------InsertSearchPosition fun test ---------------------------------
+    // int n;
 
-    StudentP student;
+    // StudentP student;
+    
+    // int blockNB, posNB;
+    // // createLOF(fichierLOF,"hichem.bin",14);
+    // LOF_fileP fichierLOF = openLOF(fichierLOF,"hichem.bin",'o');
+    // printHeader(fichierLOF,"hichem.bin");
+    // while (1)
+    // {
+    //     printf("matricule : ");
+    //     scanf("%d",&n);
+    //     printf("searching..\n");
+    //     SearchInsertionPosition(fichierLOF,"hichem.bin",n, &blockNB, &posNB);
+    //     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
 
-    int blockNB, posNB;
-    fichierLOF = openLOF(fichierLOF, "hichem.bin",'o');
-
-    while (1)
-    {
-        printf("matricule : ");
-        scanf("%d",&n);
-        printf("searching..\n");
-        SearchInsertionPosition(fichierLOF,"hichem.bin",n, &blockNB, &posNB);
-        extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-
-        printf("block: %d, position: %d \n",blockNB,posNB);
-    }
+    //     printf("block: %d, position: %d \n",blockNB,posNB);
+    // }
     
    
-    //    LOF_fileP fichierLOF;
+    // ----------Insert function --------------------------------
+    //    LOF_fileP fichierLOF = openLOF(fichierLOF,"hichem.bin",'o');
     //     int n;
 
     //     StudentP student;
@@ -166,15 +187,14 @@ int main(int argc, char *argv[])
 
     //     printHeader(fichierLOF,"hichem.bin");
     //     // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    //     fichierLOF = openLOF(fichierLOF, "hichem.bin",'o');
     //     printf("create student\n");
     //     createStudent(student);
-    //     // printStudent(student);
+    //     printStudent(student);
 
     //     insertStudent(fichierLOF, "hichem.bin", student);
         
     //     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    //     // printHeader(fichierLOF,"hichem.bin");
+    //     printHeader(fichierLOF,"hichem.bin");
 
 
         closeLOF(fichierLOF);

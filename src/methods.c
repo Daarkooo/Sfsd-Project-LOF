@@ -59,13 +59,20 @@ void createBlock(blockP S) {
 
 LOF_fileP openLOF(LOF_fileP f, char file_name[],char open_mode) {
     f = malloc(sizeof(LOF_file));
-    
+
     if (open_mode == 'o') {  // On ouvre le fichier en mode OLD 'o' (le fichier est ancien et existe deja)
         f->file = fopen(file_name, "rb+");
-        if (f->file == NULL)
+        if (f->file == NULL){
             return NULL;
+        }
         f->header = malloc(sizeof(header));
-        fread(f->header, sizeof(header), 1, f->file);
+        size_t elements_read = fread(f->header, sizeof(header), 1, f->file); // size_t returns the number of elemets read
+        if (elements_read != 1) {
+            fclose(f->file);
+            free(f->header);
+            printf("Error reading header from file\n");
+            return NULL;
+    }
         rewind(f->file);
     } else if (open_mode == 'n')
     {   // On ouvre le fichier en mode NEW 'n' (le fichier est nouveau et n'existe pas, on le cree et on initialise l'entete)
@@ -382,7 +389,7 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
 }     //creation du fichier avec N enregistrement logique (chargement initial a 60% de la capacité max du bloc)
 
 
-void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student) {
+void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
     int find,findIt,i,j,position,n_block,x,mat=1;
     blockP newBlock;
     f->tabIndex = InitTabIndex(f);
@@ -446,7 +453,6 @@ void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP stud
         }
     }
     
-    extractLOF(f,file_name,file_txt);
     closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
 
