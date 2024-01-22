@@ -78,17 +78,14 @@ int main(int argc, char *argv[])
                             //     printf("block nb = %d - pos = %d\n",blockNB,posNB);
                             // }
                             fichierLOF = openLOF(fichierLOF, ch1, 'o');
-                            while (1)
-                            {
                                 student = malloc(sizeof(Student)); 
                                 printf("create student\n");
                                 createStudent(student);
-
+                                
                                 insertStudent(fichierLOF, ch1, student);
                 
                                 extractLOF(fichierLOF, ch1, ch2);
                                 printHeader(fichierLOF, ch1);
-                            }
                             
                         break;
                     case 2:
@@ -105,7 +102,7 @@ int main(int argc, char *argv[])
                             scanf("%d",&n);
                             SearchStudent(fichierLOF, ch1, n, &blockNB, &posNB, &existe);
                             if (existe == 1){
-                                printf("\nETUDIANT TROUVE :\nBlock : %d\nPosition : %d\n", blockNB, posNB);
+                                printf("\nETUDIANT TROUVE :\nBlockID : %d\nPosition : %d\n", blockNB, posNB);
                                 break;}
                             else{
                                 printf("\nCETTE ETUDIANT N'EXISTE PAS\n");
