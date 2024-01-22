@@ -230,14 +230,12 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     while(numBlock != -1)
     {
         readBlock(f, numBlock, buffer);
-        // buffer->svt = 2;
-        printf("buffer -> svt = %d ----------------\n",buffer->svt);
 
         if(buffer->NB !=0){
             int i = 0;
             int j = 0;
             int num=1;
-            fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
+            fprintf(studentWriter, "\n\t----------BLOCK %d__(id:%d)----------\n", k+1,numBlock);
             while (i < FACT_B && j < buffer->NB)
             {
                 if (buffer->tab[i].deleted == 0)
@@ -263,7 +261,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     }
     fprintf(studentWriter, "\n------------- INDEX ARRAY CONTENT -----------\n");
     for(int i=0;i<k;i++){
-        fprintf(studentWriter, "%d - blockID %d - lastKey %d\n", i, f->tabIndex[i].blockID, f->tabIndex[i].lastKey);
+        fprintf(studentWriter, "block %d - ID %d - lastKey %d\n", i+1, f->tabIndex[i].blockID, f->tabIndex[i].lastKey);
     }
 
     closeLOF(f);
@@ -327,11 +325,13 @@ IndexP InitTabIndex(LOF_fileP f){
             }
             i++;
         }
+        (tabIndex + k)->blockID=blockNum;
         if(buffer->NB!=0){
             (tabIndex + k)->lastKey=buffer->tab[i].matricule;
-            (tabIndex + k)->blockID=blockNum;
-            k++;
-        }   
+        }else{
+            (tabIndex + k)->lastKey=(tabIndex+ k-1)->lastKey+0.5;
+        }
+        k++;
         blockNum = buffer->svt;
     }
     
@@ -422,7 +422,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
 
     SearchInsertionPosition(f,file_name,student->matricule,&i,&j);
     printf("block num : %d , position : %d\n", i,j);
-    allocBlock(f, &x, &newBlock);
+    
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
         studentCopy(newBlock->tab, student);
@@ -433,53 +433,85 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
         buffer->svt = x;
         writeBlock(f,n_block,buffer);
         writeHeader(f,2,x); 
-        writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
+        goto end;
     }
     else{ 
         readBlock(f,i,buffer);
         if(buffer->tab[j].deleted){ // si la case est deja suprime (concept logique)
             studentCopy((buffer->tab) + j, student); // mettre le contenu de student dans le buffer qui porte le contenu de la case j du block i
             buffer->NB++;
-            writeBlock(f,i,buffer); // l'ecrire dans le fichier 
-            writeHeader(f,4,readHeader(f,4)+1);// student + 1 (header)
         }
-        else{ // faire le decalge (en 2 moitie)
+        else{ 
             printf("elsee-----------\n");
-            int m=FACT_B/2 ; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
-            if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
-                printf("j<=m  ---------\n");
-                newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
-                newBlock->NB++;
-                for(int p=m;p>j;p--){
-                    buffer->tab[p]= buffer->tab[p-1]; // decalage 
+            printf("\nbufferNb : %d\n",buffer->NB);
+            if(buffer->NB!=FACT_B){ // faire le daclage interblock (block isn't full)
+                int nbBlocks = buffer->NB;
+                
+                printf("\n nb Blocks : %d\n", nbBlocks);
+                for(int p=nbBlocks; p>j; p--){
+                    buffer->tab[p]=buffer->tab[p-1];
+                }               
+                studentCopy((buffer->tab)+j, student);
+                // buffer->tab[];
+                printf("id=%d--------\n",i);
+                if(nbBlocks == FACT_B){
+                    printf("\n we are here student copy directly \n");
+                    studentCopy((buffer->tab)+nbBlocks, student);
                 }
-                studentCopy((buffer->tab) + j, student);
-                for(int p=1;p<=m;p++){
-                    newBlock->tab[p]=buffer->tab[p+m]; // remplire le rest du nv block ave la 2em moitie du iem block
-                    buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
-                    buffer->NB--;
-                    newBlock->NB++;
-                }
-            }else{ // si la case ou on vas inserer se trouve dans la deuxieme moitie
-                printf("printing la 2 moitite ----------");
-                int indexnv=j-m-1;
-                studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
-                newBlock->NB++;
-                for(int p=0;p<=m;p++){
-                    if(p==indexnv){ // passer a la prochaine case cuz we have already put our new student here
-                        continue;
-                    }
-                    newBlock->tab[p]=buffer->tab[p+m]; //
-                    buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
-                    buffer->NB--;
-                    newBlock->NB++;
-                }
+                buffer->NB++;
 
+                writeBlock(f,i,buffer);
+                goto end;
             }
+            
+
+            else{ // // faire le decalge (en 2 moitie)
+                allocBlock(f, &x, &newBlock);
+                int m=FACT_B/2 ; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+                
+                if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
+                    printf("j<=m  ---------\n");
+                    newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
+                    newBlock->NB++;
+                    for(int p=m;p>j;p--){
+                        buffer->tab[p]= buffer->tab[p-1]; // decalage 
+                    }
+                    studentCopy((buffer->tab) + j, student);
+                    if(buffer->NB>m+1)
+                        for(int p=1;p<=m;p++){
+                            newBlock->tab[p]=buffer->tab[p+m]; // remplire le rest du nv block ave la 2em moitie du iem block
+                            buffer->tab[p+m].deleted=1; // la case deplace dans le nv block on la supprime du i em block
+                            buffer->NB--;
+                            newBlock->NB++;
+                        }
+                }
+            
+                else{ // si la case ou on vas inserer se trouve dans la deuxieme moitie
+                    printf("printing la 2 moitite ----------");
+                    int indexnv=j-m-1;
+                    studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
+                    newBlock->NB++;
+                    int p2=m+1;
+                    for(int p=0;p<=m;p++){
+                        if(p==indexnv){ // passer a la prochaine case cuz we have already put our new student here
+                            continue;
+                        }
+                        newBlock->tab[p]=buffer->tab[p2]; //
+                        buffer->tab[p2].deleted=1; // la case deplace dans le nv block on la supprime du i em block
+                        buffer->NB--;
+                        newBlock->NB++;
+                        p2++;
+                    }
+                }
+            }
+            
             newBlock->svt=buffer->svt; // le nv block on le chaine avc le svt du i em block
             buffer->svt=x;  // le i em block on le chaine avc le nv block 
-            writeBlock(f,i,buffer);
             writeBlock(f,x,newBlock);
+            writeBlock(f,i,buffer);
+            end:
+            printf("buffer->   svt  =  %d  xxxx\n",buffer->svt);
+            printf("\nnewblock    ->   svt  =  %d\n",newBlock->svt);
             writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
         }
     }
@@ -491,69 +523,124 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
     f = openLOF(f,file_name,'o');
     f->tabIndex = InitTabIndex(f);
 
-    if (readHeader(f, 4) != 0)  //verfier si le fichier contient des etudiants
-    {
-        printf("number of blocks: %d\n",readHeader(f,3));
-        int start = 0;
-        int end = readHeader(f, 3) - 1;
+    // if (readHeader(f, 4) != 0){ //verfier si le fichier contient des etudiants
+    // {
+    //     printf("number of blocks: %d\n",readHeader(f,3));
+    //     int start = 0;
+    //     int end = readHeader(f, 3) - 1;
 
-        if(end == 0){
-            if(f->tabIndex[0].lastKey<matricule){
-                *BlockNB = 2;
-                *PositionNB = -1;
+    //     if(end == 0){
+    //         if(f->tabIndex[0].lastKey<matricule){
+    //             *BlockNB = 2;
+    //             *PositionNB = -1;
+    //             return;
+    //         }
+    //         else{
+    //             *BlockNB = 1; // if we have only one block and last key > matricule
+    //             goto oneBlock;
+    //         }
+    //     }
+        int i=0;
+        int numbBlock = readHeader(f, 1);
+        *BlockNB = numbBlock;
+        while (numbBlock != -1)
+        {
+            readBlock(f, numbBlock, buffer);
+            i=0;
+            if(buffer->svt != -1){
+                while (i<FACT_B)
+                {
+                    if(buffer->tab[i].matricule<matricule){
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if(i<FACT_B){ 
+                    *BlockNB = numbBlock;
+                    *PositionNB = i;
+                    return;
+                }else{
+                    *BlockNB = numbBlock+1;
+                    *PositionNB = 0;
+
+                }
+            }
+
+            else{
+               while (buffer->tab[i].matricule<matricule &&  buffer->tab[i].matricule != f->tabIndex[numbBlock-1].lastKey ){
+                    i++;
+                }
+                if( buffer->tab[i].matricule<matricule && buffer->tab[i].matricule==f->tabIndex[numbBlock-1].lastKey){
+                    i++;
+                    *BlockNB = numbBlock;
+                }
+                printf("\nbefore----\n");
+                if(i>=FACT_B){
+                    printf("\ninside----\n");
+                    i = -1;
+                    *BlockNB = numbBlock+1;
+                }
+                *PositionNB = i;
                 return;
             }
-            else{
-                *BlockNB = 1; // if we have only one block and last key > matricule
-                goto oneBlock;
-            }
-        }
+            
+            numbBlock = buffer->svt;
 
-        printf("number of blocks-end: %d\n",end);
+        }
+ 
+        
 
-        while ((end - start) > 1) {    //tant que taille(tab) > 2 cases
-            int m = (start + end) / 2;
-            if (f->tabIndex[m].lastKey > matricule){    // la dernier cle du bloc est la cle qu'on cherche
-                end = m;
-            } 
-            else{
-                start = m;
-            }  //la dernier cle du bloc est inferieur, on cherche dans les blocs suivants   
-        }
-        printf("start = %d, end = %d\n", start+1, end+1);
-        if(f->tabIndex[start].lastKey>matricule){
-            *BlockNB = end;
-        }else{
-            *BlockNB = end+1;
-        }
-        oneBlock:
-        printf("blockNB = %d\n", *BlockNB);
-        readBlock(f, *BlockNB, buffer);
-        int i = 0;
-        if((buffer->svt) !=-1){
-            while (i < FACT_B && buffer->tab[i].matricule < matricule){
-                i++;
-            }
-        }else{
-            printf("lastkey = %d",f->tabIndex[*BlockNB-1].lastKey);
-            if(buffer->NB==0){
-                i=0;
-            }
-            else{
-                while (buffer->tab[i].matricule<matricule &&  buffer->tab[i].matricule != f->tabIndex[*BlockNB-1].lastKey ){
-                    i++;
-                }
-                if( buffer->tab[i].matricule<matricule && buffer->tab[i].matricule==f->tabIndex[*BlockNB-1].lastKey){
-                    i++;
-                }
-                if(i>=FACT_B){
-                    i==-1;
-                }
-            }
-        }
-        *PositionNB = i;
+
+
+
+        // printf("number of blocks-end: %d\n",end);
+
+        // while ((end - start) > 1) {    //tant que taille(tab) > 2 cases
+        //     int m = (start + end) / 2;
+        //     if (f->tabIndex[m].lastKey > matricule){    // la dernier cle du bloc est la cle qu'on cherche
+        //         end = m;
+        //     } 
+        //     else{
+        //         start = m;
+        //     }  //la dernier cle du bloc est inferieur, on cherche dans les blocs suivants   
+        // }
+        // printf("start = %d, end = %d\n", start+1, end+1);
+        // if(f->tabIndex[start].lastKey>matricule){
+        //     *BlockNB = end;
+        // }else{
+        //     *BlockNB = end+1;
+        // }
+        // oneBlock:
+        // printf("blockNB = %d\n", *BlockNB);
+        // readBlock(f, *BlockNB, buffer);
+        // int i = 0;
+        // if((buffer->svt) !=-1){
+        //     while (i < FACT_B && buffer->tab[i].matricule < matricule){
+        //         i++;
+        //     }
+        // }else{
+        //     printf("lastkey = %d",f->tabIndex[*BlockNB-1].lastKey);
+        //     if(buffer->NB==0){
+        //         i=0;
+        //     }
+        //     else{
+        //         while (buffer->tab[i].matricule<matricule &&  buffer->tab[i].matricule != f->tabIndex[*BlockNB-1].lastKey ){
+        //             i++;
+        //         }
+        //         if( buffer->tab[i].matricule<matricule && buffer->tab[i].matricule==f->tabIndex[*BlockNB-1].lastKey){
+        //             i++;
+        //         }
+        //         if(i>=FACT_B){
+        //             i==-1;
+        //         }
+        //     }
+        // *PositionNB = i;
+        // }
         printf("\npositionNB of insertion= %d\n\n", i+1);
-    }
+    // }
     closeLOF(f);  // close the file
 }
 
