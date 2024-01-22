@@ -16,6 +16,8 @@ int main(int argc, char *argv[])
     // LOF_fileP fichierLOF;
     // int blockNB, posNB, existe;
     // char trompe;
+    // StudentP student;
+
     // do
     // {
     //     main_menu:
@@ -68,7 +70,14 @@ int main(int argc, char *argv[])
     //                 switch (option)
     //                 {
     //                 case 1:
-    //                     /* code */
+    //                         student = malloc(sizeof(Student)); 
+    //                         printf("create student\n");
+                            
+    //                         createStudent(student);
+
+    //                         insertStudent(fichierLOF, ch1, student);
+            
+    //                         extractLOF(fichierLOF, ch1, ch2);
     //                     break;
     //                 case 2:
     //                         printf("\nEntrez le matricule de l'etudiant a supprimer : ");
@@ -134,40 +143,37 @@ int main(int argc, char *argv[])
     // scanf("%d",&n);
     // DeleteStudent(fichierLOF, "hichem.bin",n);
     // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+
+
+
+    // LOF_fileP fichierLOF;
+    // fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
+    // // createLOF(fichierLOF, "test.bin",8);
+    // extractLOF(fichierLOF, "test.bin","test.txt");
+    // printHeader(fichierLOF,"test.bin");
+    // int n;
     // printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
     // scanf("%d",&n);
-    // DeleteStudent(fichierLOF, "hichem.bin",n);
-    // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-
-
-    LOF_fileP fichierLOF;
-    createLOF(fichierLOF, "test.bin",8);
-    extractLOF(fichierLOF, "test.bin","test.txt");
-    printHeader(fichierLOF,"test.bin");
-    int n;
-    printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
-    scanf("%d",&n);
-    DeleteStudent(fichierLOF, "test.bin",n);
-    extractLOF(fichierLOF, "test.bin", "test.txt");
-    // printHeader(fichierLOF,"hichem.bin");
+    // DeleteStudent(fichierLOF, "test.bin",n);
+    // extractLOF(fichierLOF, "test.bin", "test.txt");
 
     
     // ----------InsertSearchPosition fun test ---------------------------------
     // int n;
 
     // StudentP student;
-    
+    //  LOF_fileP fichierLOF; 
     // int blockNB, posNB;
-    // // createLOF(fichierLOF,"hichem.bin",14);
-    // LOF_fileP fichierLOF = openLOF(fichierLOF,"hichem.bin",'o');
-    // printHeader(fichierLOF,"hichem.bin");
+    // // createLOF(fichierLOF,"test.bin",3);
+    // fichierLOF = openLOF(fichierLOF,"test.bin",'o');
+    // printHeader(fichierLOF,"test.bin");
     // while (1)
     // {
     //     printf("matricule : ");
     //     scanf("%d",&n);
     //     printf("searching..\n");
-    //     SearchInsertionPosition(fichierLOF,"hichem.bin",n, &blockNB, &posNB);
-    //     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
+    //     SearchInsertionPosition(fichierLOF,"test.bin",n, &blockNB, &posNB);
+    //     extractLOF(fichierLOF, "test.bin", "test.txt");
 
     //     printf("block: %d, position: %d \n",blockNB,posNB);
     // }
@@ -175,26 +181,33 @@ int main(int argc, char *argv[])
    
     // ----------Insert function --------------------------------
     //    LOF_fileP fichierLOF = openLOF(fichierLOF,"hichem.bin",'o');
-    //     int n;
+        int n;
+        LOF_fileP fichierLOF;
 
-    //     StudentP student;
+        StudentP student;
 
-    //     int blockNB, posNB, existe;
-    //     // printf("Combien d'etudiant voulez vous inserez : ");
-    //     // scanf("%d",&n);
-    //     // createLOF(fichierLOF, "hichem.bin", n);
+        int blockNB, posNB;
+        // scanf("%d",&n);
+        createLOF(fichierLOF, "test.bin", 3);
+        //  fichierLOF = openLOF(fichierLOF, "test.bin", 'o');
+        // extractLOF(fichierLOF, "test.bin", "test.txt");
+        // printHeader(fichierLOF,"hichem.bin");
+        while(1){
+            printf("Quelle est le matricule de l'etudiant que vous voulez le supprimer : ");
+            scanf("%d",&n);  
 
+            DeleteStudent(fichierLOF,"test.bin",n);
+            extractLOF(fichierLOF, "test.bin", "test.txt");
+            printf("create student\n");
+            createStudent(student);
+            printStudent(student);
 
-    //     printHeader(fichierLOF,"hichem.bin");
-    //     // extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    //     printf("create student\n");
-    //     createStudent(student);
-    //     printStudent(student);
-
-    //     insertStudent(fichierLOF, "hichem.bin", student);
-        
-    //     extractLOF(fichierLOF, "hichem.bin", "hichem.txt");
-    //     printHeader(fichierLOF,"hichem.bin");
+            insertStudent(fichierLOF, "test.bin", student);
+            
+            extractLOF(fichierLOF, "test.bin", "test.txt");
+            // printf("\nprinting header: \n");
+            // printHeader(fichierLOF,"test.bin");
+        }
 
 
         closeLOF(fichierLOF);
