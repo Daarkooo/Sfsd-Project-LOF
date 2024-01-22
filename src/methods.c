@@ -424,6 +424,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
     
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
+        allocBlock(f, &x, &newBlock);
         studentCopy(newBlock->tab, student);
         newBlock->NB++; // ----------------
         n_block=readHeader(f,2);
@@ -432,6 +433,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
         buffer->svt = x;
         writeBlock(f,n_block,buffer);
         writeHeader(f,2,x); 
+        printf("last block %d\n",readHeader(f,2));
         goto end;
     }
     else{ 
@@ -476,8 +478,12 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
 
             else{ // // faire le decalge (en 2 moitie)
                 allocBlock(f, &x, &newBlock);
-                int m=FACT_B/2 ; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
-                
+                int pair=0;
+                if(FACT_B %2 ==0) // dans le cas ou le facteur de blocage est pair ou impaire 
+                {
+                    pair=1;
+                }
+                int m=FACT_B/2 - pair; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
                 if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
                     printf("j<=m  ---------\n");
                     newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
@@ -489,7 +495,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
                         buffer->tab[p]= buffer->tab[p-1]; // decalage 
                     }
                     studentCopy((buffer->tab) + j, student);
-                        for(int p=1;p<=m;p++){
+                        for(int p=1; p<=m+pair; p++){
                             if(buffer->tab[p+m].deleted==1){
                                 continue;
                             }
@@ -507,7 +513,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
                     studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
                     newBlock->NB++;
                     int p2=m+1;
-                    for(int p=0;p<=m;p++){
+                    for(int p=0;p<=m+pair;p++){
                         if(p==indexnv ){ // passer a la prochaine case cuz we have already put our new student here
                             continue;
                         }
@@ -595,7 +601,7 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
  
         
         printf("\npositionNB of insertion= %d\n\n", i+1);
-        
+
     closeLOF(f);  // close the file
 }
 
