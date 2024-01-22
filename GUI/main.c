@@ -32,9 +32,12 @@ int main()
     // Initialization
     //---------------------------------------------------------------------------------------
     int screenWidth = 1200;
-    int screenHeight = 700;
+    int screenHeight = 600;
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
+
+    // Load a TrueType Font file
+    Font font = LoadFont("./Zian free promo.ttf");
 
     // layout_name: controls initialization
     //----------------------------------------------------------------------------------
@@ -124,7 +127,8 @@ int main()
 
             ClearBackground(DARKGRAY);
 
-            DrawText("--- MAIN MENU ---", 100, 50, 25, WHITE); 
+            // DrawText("--- MAIN MENU ---", 100, 50, 25, WHITE);
+            DrawTextEx(font, "MAIN MENU", (Vector2){120, 50}, 30, 5, WHITE); 
 
             // raygui: controls drawing
             //----------------------- MAIN MENU --------------------------
@@ -167,6 +171,9 @@ int main()
         //----------------------------------------------------------------------------------
     }
 
+    
+    // Unload the font when done
+    UnloadFont(font);
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
