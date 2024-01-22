@@ -17,6 +17,13 @@ static void EditButton();                // Button: editButton logic
 //------------- CREATE WINDOW BUTTONS ------------
 static void FinishCreateButton();                // Button: FinishCreateButton logic
 
+//------------------ EDIT WINDOW BUTTONS ----------------------
+static void InsertStudentButton();                // Button: InsertStudentButton logic
+static void SearchStudentButton();                // Button: SearchStudentButton logic
+static void DeleteStudentButton();                // Button: DeleteStudentButton logic
+static void ModifyStudentButton();                // Button: ModifyStudentButton logic
+
+
 
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -25,7 +32,7 @@ int main()
     // Initialization
     //---------------------------------------------------------------------------------------
     int screenWidth = 1200;
-    int screenHeight = 600;
+    int screenHeight = 700;
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
 
@@ -40,9 +47,9 @@ int main()
 
     // Define controls rectangles
     Rectangle layoutRecs[4] = {
-        (Rectangle){ 100, 150, 330, 80 },    // Button: createButton
-        (Rectangle){ 100, 300, 330, 80 },    // Button: editButton
-        (Rectangle){ 150, 450, 230, 60 },    // Button: exitButton
+        (Rectangle){ 50, 150, 330, 80 },    // Button: createButton
+        (Rectangle){ 50, 300, 330, 80 },    // Button: editButton
+        (Rectangle){ 100, 450, 230, 60 },    // Button: exitButton
     };
     //----------------------------------------------------------------------------------
 
@@ -63,13 +70,39 @@ int main()
     // Define controls rectangles
     Rectangle layoutRecs2[6] = {
         (Rectangle){ 500, 104, 616, 376 },    // WindowBox: CreateWindowBox
-        (Rectangle){ 740, 176, 224, 48 },    // TextBox: FileNameTextBox
-        (Rectangle){ 740, 280, 224, 40 },    // Spinner: NbStudentsSpinner
-        (Rectangle){ 612, 192, 120, 24 },    // Label: FileNameLabel
-        (Rectangle){ 580, 288, 120, 24 },    // Label: NbStudentLabel
+        (Rectangle){ 740, 210, 225, 40 },    // TextBox: FileNameTextBox
+        (Rectangle){ 740, 310, 225, 40 },    // Spinner: NbStudentsSpinner
+        (Rectangle){ 612, 220, 120, 24 },    // Label: FileNameLabel
+        (Rectangle){ 580, 320, 120, 24 },    // Label: NbStudentLabel
         (Rectangle){ 756, 400, 104, 48 },    // Button: FinishCreateButton
     };
     //-------------- END CREATE WINDOW ------------
+
+    //-------------------- EDIT WINDOW --------------------
+    // Const text
+    const char *EditWindowText = "EDIT WINDOW";    // WINDOWBOX: EditWindow
+    const char *EditFileNameLabelText = "FILE NAME";    // LABEL: EditFileNameLabel
+    const char *InsertStudentButtonText = "INSERT STUDENT";    // BUTTON: InsertStudentButton
+    const char *SearchStudentButtonText = "SEARCH STUDENT";    // BUTTON: SearchStudentButton
+    const char *DeleteStudentButtonText = "DELETE STUDENT";    // BUTTON: DeleteStudentButton
+    const char *ModifyStudentButtonText = "MODIFY STUDENT";    // BUTTON: ModifyStudentButton
+    
+    // Define controls variables
+    bool EditWindowActive = false;            // WindowBox: EditWindow
+    bool EditFileNameTextBoxEditMode = false;
+    char EditFileNameTextBoxText[128] = "";            // TextBox: EditFileNameTextBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs3[7] = {
+        (Rectangle){ 450, 40, 704, 528 },    // WindowBox: EditWindow
+        (Rectangle){ 700, 190, 216, 48 },    // TextBox: EditFileNameTextBox
+        (Rectangle){ 620, 200, 112, 32 },    // Label: EditFileNameLabel
+        (Rectangle){ 500, 340, 264, 64 },    // Button: InsertStudentButton
+        (Rectangle){ 500, 450, 264, 64 },    // Button: SearchStudentButton
+        (Rectangle){ 840, 340, 264, 64 },    // Button: DeleteStudentButton
+        (Rectangle){ 840, 450, 264, 64 },    // Button: ModifyStudentButton
+    };
+    //------------------ END EDIT WINDOW -------------------
 
 
 
@@ -91,13 +124,13 @@ int main()
 
             ClearBackground(DARKGRAY);
 
-            DrawText("--- MAIN MENU ---", 150, 50, 25, WHITE); 
+            DrawText("--- MAIN MENU ---", 100, 50, 25, WHITE); 
 
             // raygui: controls drawing
             //----------------------- MAIN MENU --------------------------
             // Draw controls
             if (GuiButton(layoutRecs[0], createButtonText)) CreateWindowBoxActive = true; 
-            if (GuiButton(layoutRecs[1], editButtonText)) EditButton(); 
+            if (GuiButton(layoutRecs[1], editButtonText)) EditWindowActive = true; 
             if (GuiButton(layoutRecs[2], exitButtonText)) break;
             //------------------------ END MAIN MENU -------------------------
 
@@ -106,6 +139,7 @@ int main()
             if (CreateWindowBoxActive)
             {
                 CreateWindowBoxActive = !GuiWindowBox(layoutRecs2[0], CreateWindowBoxText);
+                DrawText("--- CREATE MENU ---", 675, 150, 20, GRAY);
                 if (GuiTextBox(layoutRecs2[1], FileNameTextBoxText, 128, FileNameTextBoxEditMode)) FileNameTextBoxEditMode = !FileNameTextBoxEditMode;
                 if (GuiSpinner(layoutRecs2[2], "", &NbStudentsSpinnerValue, 0, 100, NbStudentsSpinnerEditMode)) NbStudentsSpinnerEditMode = !NbStudentsSpinnerEditMode;
                 GuiLabel(layoutRecs2[3], FileNameLabelText);
@@ -113,6 +147,21 @@ int main()
                 if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) FinishCreateButton();
             }
             //---------------------- END CREATE WINDOW ----------------------
+
+            //----------------------- EDIT WINDOW --------------------------
+            // Draw controls
+            if (EditWindowActive)
+            {
+                EditWindowActive = !GuiWindowBox(layoutRecs3[0], EditWindowText);
+                DrawText("--- EDIT MENU ---", 710, 100, 20, GRAY);
+                if (GuiTextBox(layoutRecs3[1], EditFileNameTextBoxText, 128, EditFileNameTextBoxEditMode)) EditFileNameTextBoxEditMode = !EditFileNameTextBoxEditMode;
+                GuiLabel(layoutRecs3[2], EditFileNameLabelText);
+                if (GuiButton(layoutRecs3[3], InsertStudentButtonText)) InsertStudentButton(); 
+                if (GuiButton(layoutRecs3[4], SearchStudentButtonText)) SearchStudentButton(); 
+                if (GuiButton(layoutRecs3[5], DeleteStudentButtonText)) DeleteStudentButton(); 
+                if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) ModifyStudentButton(); 
+            }
+            //----------------------- END EDIT WINDOW --------------------------
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -126,16 +175,32 @@ int main()
     return 0;
 }
 
-//------------------------------------------------------------------------------------
-// Controls Functions Definitions (local)
-//------------------------------------------------------------------------------------
-// Button: editButton logic
-static void EditButton()
+
+//------------------------- CREATE WINDOW BUTTON --------------------------
+// Button: FinishCreateButton logic
+static void FinishCreateButton()
 {
     // TODO: Implement control logic
 }
-// Button: FinishCreateButton logic
-static void FinishCreateButton()
+
+//----------------------- EDIT WINDOW BUTTONS ----------------------
+// Button: InsertStudentButton logic
+static void InsertStudentButton()
+{
+    // TODO: Implement control logic
+}
+// Button: SearchStudentButton logic
+static void SearchStudentButton()
+{
+    // TODO: Implement control logic
+}
+// Button: DeleteStudentButton logic
+static void DeleteStudentButton()
+{
+    // TODO: Implement control logic
+}
+// Button: ModifyStudentButton logic
+static void ModifyStudentButton()
 {
     // TODO: Implement control logic
 }
