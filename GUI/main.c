@@ -36,8 +36,6 @@ int main()
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
 
-    // Load a TrueType Font file
-    Font font = LoadFont("./fonts/Emizen.ttf");
 
     //------------------------ MAIN MENU ------------------------
     // Const text
@@ -106,8 +104,13 @@ int main()
     };
     //------------------ END EDIT WINDOW -------------------
 
+    //Loading Style File
+    GuiLoadStyle("./style/style.rgs");
 
-
+    //Loading Font Files
+    Font EmizenFont = LoadFontEx("./fonts/Emizen.ttf", 48, 0, 0);
+    Font CourierFont = LoadFontEx("./fonts/Courier New Bold Italic font.ttf", 40, 0, 0);
+    GuiSetFont(CourierFont);
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
@@ -126,11 +129,11 @@ int main()
 
             ClearBackground(BLACK);
 
-            DrawTextEx(font, "MAIN MENU", (Vector2){100, 50}, 50, 3, WHITE);
+            DrawTextEx(EmizenFont, "MAIN MENU", (Vector2){100, 50}, EmizenFont.baseSize, 3, WHITE);
             DrawLine(100, 100, 300, 100, WHITE);
-            DrawTextEx(font, "VISUALISATION", (Vector2){10, 580}, 40, 3, WHITE);
-            DrawLine(280, 600, 1200, 600, WHITE);
-            GuiLoadStyle("./style/style.rgs"); 
+            DrawTextEx(EmizenFont, "VISUALISATION", (Vector2){10, 580}, EmizenFont.baseSize, 3, WHITE);
+            DrawLine(320, 600, 1200, 600, WHITE);
+            
 
             // raygui: controls drawing
             //----------------------- MAIN MENU --------------------------
@@ -180,9 +183,9 @@ int main()
         //----------------------------------------------------------------------------------
     }
 
-    
     // Unload the font when done
-    UnloadFont(font);
+    UnloadFont(EmizenFont);
+    UnloadFont(CourierFont);
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
