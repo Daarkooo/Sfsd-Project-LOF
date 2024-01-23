@@ -32,15 +32,14 @@ int main()
     // Initialization
     //---------------------------------------------------------------------------------------
     int screenWidth = 1200;
-    int screenHeight = 600;
+    int screenHeight = 1000;
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
 
     // Load a TrueType Font file
-    Font font = LoadFont("./Zian free promo.ttf");
+    Font font = LoadFont("./fonts/Emizen.ttf");
 
-    // layout_name: controls initialization
-    //----------------------------------------------------------------------------------
+    //------------------------ MAIN MENU ------------------------
     // Const text
     const char *createButtonText = "CREATE A NEW FILE";    // BUTTON: createButton
     const char *editButtonText = "EDIT AN OLD FILE";    // BUTTON: editButton
@@ -54,7 +53,7 @@ int main()
         (Rectangle){ 50, 300, 330, 80 },    // Button: editButton
         (Rectangle){ 100, 450, 230, 60 },    // Button: exitButton
     };
-    //----------------------------------------------------------------------------------
+    //----------------------------- END MAIN MENU -----------------------------
 
     //------------ CREATE WINDOW -----------------
     // Const text
@@ -72,7 +71,7 @@ int main()
 
     // Define controls rectangles
     Rectangle layoutRecs2[6] = {
-        (Rectangle){ 500, 104, 616, 376 },    // WindowBox: CreateWindowBox
+        (Rectangle){ 500, 100, 620, 400 },    // WindowBox: CreateWindowBox
         (Rectangle){ 740, 210, 225, 40 },    // TextBox: FileNameTextBox
         (Rectangle){ 740, 310, 225, 40 },    // Spinner: NbStudentsSpinner
         (Rectangle){ 612, 220, 120, 24 },    // Label: FileNameLabel
@@ -125,17 +124,27 @@ int main()
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
-            ClearBackground(DARKGRAY);
+            ClearBackground(BLACK);
 
-            // DrawText("--- MAIN MENU ---", 100, 50, 25, WHITE);
-            DrawTextEx(font, "MAIN MENU", (Vector2){120, 50}, 30, 5, WHITE); 
+            DrawTextEx(font, "MAIN MENU", (Vector2){100, 50}, 50, 3, WHITE);
+            DrawLine(100, 100, 300, 100, WHITE);
+            DrawTextEx(font, "VISUALISATION", (Vector2){10, 580}, 40, 3, WHITE);
+            DrawLine(280, 600, 1200, 600, WHITE);
+            GuiLoadStyle("./style/style.rgs"); 
 
             // raygui: controls drawing
             //----------------------- MAIN MENU --------------------------
             // Draw controls
-            if (GuiButton(layoutRecs[0], createButtonText)) CreateWindowBoxActive = true; 
-            if (GuiButton(layoutRecs[1], editButtonText)) EditWindowActive = true; 
+            if (GuiButton(layoutRecs[0], createButtonText)) { 
+                CreateWindowBoxActive = true;
+                EditWindowActive = false;
+            }
+            if (GuiButton(layoutRecs[1], editButtonText)) {
+                EditWindowActive = true;
+                CreateWindowBoxActive = false;
+            } 
             if (GuiButton(layoutRecs[2], exitButtonText)) break;
+            
             //------------------------ END MAIN MENU -------------------------
 
             //--------------------- CREATE WINDOW ---------------------
@@ -143,7 +152,7 @@ int main()
             if (CreateWindowBoxActive)
             {
                 CreateWindowBoxActive = !GuiWindowBox(layoutRecs2[0], CreateWindowBoxText);
-                DrawText("--- CREATE MENU ---", 675, 150, 20, GRAY);
+                DrawText("--- CREATE MENU ---", 675, 150, 20, WHITE);
                 if (GuiTextBox(layoutRecs2[1], FileNameTextBoxText, 128, FileNameTextBoxEditMode)) FileNameTextBoxEditMode = !FileNameTextBoxEditMode;
                 if (GuiSpinner(layoutRecs2[2], "", &NbStudentsSpinnerValue, 0, 100, NbStudentsSpinnerEditMode)) NbStudentsSpinnerEditMode = !NbStudentsSpinnerEditMode;
                 GuiLabel(layoutRecs2[3], FileNameLabelText);
@@ -157,7 +166,7 @@ int main()
             if (EditWindowActive)
             {
                 EditWindowActive = !GuiWindowBox(layoutRecs3[0], EditWindowText);
-                DrawText("--- EDIT MENU ---", 710, 100, 20, GRAY);
+                DrawText("--- EDIT MENU ---", 710, 100, 20, WHITE);
                 if (GuiTextBox(layoutRecs3[1], EditFileNameTextBoxText, 128, EditFileNameTextBoxEditMode)) EditFileNameTextBoxEditMode = !EditFileNameTextBoxEditMode;
                 GuiLabel(layoutRecs3[2], EditFileNameLabelText);
                 if (GuiButton(layoutRecs3[3], InsertStudentButtonText)) InsertStudentButton(); 
