@@ -11,11 +11,8 @@
 
 
 // Controls Functions Declaration
-//--------------------- MAIN MENU BUTTONS -------------------------
-static void EditButton();                // Button: editButton logic
-
 //------------- CREATE WINDOW BUTTONS ------------
-static void FinishCreateButton();                // Button: FinishCreateButton logic
+static void FinishCreateButton(char* file_name, int nb);                // Button: FinishCreateButton logic
 
 //------------------ EDIT WINDOW BUTTONS ----------------------
 static void InsertStudentButton();                // Button: InsertStudentButton logic
@@ -23,6 +20,8 @@ static void SearchStudentButton();                // Button: SearchStudentButton
 static void DeleteStudentButton();                // Button: DeleteStudentButton logic
 static void ModifyStudentButton();                // Button: ModifyStudentButton logic
 
+//------------ INSERT WINDOW BUTTONS -------------------
+static void InsertWindowButton();                // Button: insertWindowButton logic
 
 
 // Program main entry point
@@ -104,6 +103,36 @@ int main()
     };
     //------------------ END EDIT WINDOW -------------------
 
+    //--------------------- INSERT WINDOW --------------------------
+    // Const text
+    const char *insertWindowText = "INSERT WINDOW";    // WINDOWBOX: insertWindow
+    const char *nameLabelText = "NAME";    // LABEL: nameLabel
+    const char *matriculeLabelText = "STUDENT KEY";    // LABEL: matriculeLabel
+    const char *surnameLabelText = "SURNAME";    // LABEL: surnameLabel
+    const char *insertWindowButtonText = "INSERT";    // BUTTON: insertWindowButton
+    
+    // Define controls variables
+    bool insertWindowActive = false;            // WindowBox: insertWindow
+    bool NameTextBoxEditMode = false;
+    char NameTextBoxText[128] = "";            // TextBox: NameTextBox
+    bool MatriculeTextBoxEditMode = false;
+    char MatriculeTextBoxText[128] = "";            // TextBox: MatriculeTextBox
+    bool SurnameTextBoxEditMode = false;
+    char SurnameTextBoxText[128] = "";            // TextBox: SurnameTextBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs4[8] = {
+        (Rectangle){ 600, 20, 408, 568 },    // WindowBox: insertWindow
+        (Rectangle){ 680, 140, 264, 48 },    // TextBox: NameTextBox
+        (Rectangle){ 790, 110, 120, 24 },    // Label: nameLabel
+        (Rectangle){ 680, 380, 264, 48 },    // TextBox: MatriculeTextBox
+        (Rectangle){ 680, 260, 264, 48 },    // TextBox: SurnameTextBox
+        (Rectangle){ 770, 350, 120, 24 },    // Label: matriculeLabel
+        (Rectangle){ 780, 230, 120, 24 },    // Label: surnameLabel
+        (Rectangle){ 720, 500, 168, 64 },    // Button: insertWindowButton
+    };
+    //--------------------- END INSERT WINDOW ------------------
+
     //Loading Style File
     GuiLoadStyle("./style/style.rgs");
 
@@ -111,6 +140,9 @@ int main()
     Font EmizenFontBig = LoadFontEx("./fonts/Emizen.ttf", 70, 0, 0);
     Font EmizenFontSmall = LoadFontEx("./fonts/Emizen.ttf", 48, 0, 0);
     Font ButtonFont = LoadFontEx("./fonts/Satoshi-Black.otf", 20, 0, 0);
+    Font WindowTitleFont = LoadFontEx("./fonts/Hoover-Bold.otf", 35, 0, 0);
+    Font WindowButtonFont = LoadFontEx("./fonts/Nippo-Medium.otf", 20, 0, 0);
+    Font SuccesMessageFont = LoadFontEx("./fonts/Tanker-Regular.otf", 30, 0, 0);
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
@@ -126,11 +158,12 @@ int main()
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-
-            ClearBackground(BLACK);
+            
+            ClearBackground((Color){30, 40, 0, 0});
+            
 
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
-            DrawLine(80, 100, 380, 100, WHITE);
+            DrawLine(80, 100, 370, 100, WHITE);
             DrawTextEx(EmizenFontSmall, "VISUALISATION", (Vector2){10, 580}, EmizenFontSmall.baseSize, 3, WHITE);
             DrawLine(320, 600, 1200, 600, WHITE);
             
@@ -161,11 +194,16 @@ int main()
             {
                 CreateWindowBoxActive = !GuiWindowBox(layoutRecs2[0], CreateWindowBoxText);
                 DrawText("--- CREATE MENU ---", 675, 150, 20, WHITE);
+
                 if (GuiTextBox(layoutRecs2[1], FileNameTextBoxText, 128, FileNameTextBoxEditMode)) FileNameTextBoxEditMode = !FileNameTextBoxEditMode;
+
                 if (GuiSpinner(layoutRecs2[2], "", &NbStudentsSpinnerValue, 0, 100, NbStudentsSpinnerEditMode)) NbStudentsSpinnerEditMode = !NbStudentsSpinnerEditMode;
+
                 GuiLabel(layoutRecs2[3], FileNameLabelText);
+
                 GuiLabel(layoutRecs2[4], NbStudentLabelText);
-                if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) FinishCreateButton();
+
+                if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
             }
             //---------------------- END CREATE WINDOW ----------------------
 
@@ -184,6 +222,24 @@ int main()
             }
             //----------------------- END EDIT WINDOW --------------------------
 
+            //------------------------- INSERT WINDOW ----------------------
+            // Draw controls
+            if (insertWindowActive)
+            {
+                insertWindowActive = !GuiWindowBox(layoutRecs4[0], insertWindowText);
+                DrawTextEx(WindowTitleFont, "INSERT A STUDENT", (Vector2){680, 50}, WindowTitleFont.baseSize, 2, WHITE);
+                DrawLine(670, 85, 950, 85, WHITE);
+
+                if (GuiTextBox(layoutRecs4[1], NameTextBoxText, 128, NameTextBoxEditMode)) NameTextBoxEditMode = !NameTextBoxEditMode;
+                GuiLabel(layoutRecs4[2], nameLabelText);
+                if (GuiTextBox(layoutRecs4[3], MatriculeTextBoxText, 128, MatriculeTextBoxEditMode)) MatriculeTextBoxEditMode = !MatriculeTextBoxEditMode;
+                if (GuiTextBox(layoutRecs4[4], SurnameTextBoxText, 128, SurnameTextBoxEditMode)) SurnameTextBoxEditMode = !SurnameTextBoxEditMode;
+                GuiLabel(layoutRecs4[5], matriculeLabelText);
+                GuiLabel(layoutRecs4[6], surnameLabelText);
+                if (GuiButton(layoutRecs4[7], insertWindowButtonText)) InsertWindowButton(); 
+            }
+            //-------------------------- END INSERT WINDOW ---------------------------
+
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
@@ -192,6 +248,9 @@ int main()
     UnloadFont(EmizenFontBig);
     UnloadFont(EmizenFontSmall);
     UnloadFont(ButtonFont);
+    UnloadFont(WindowTitleFont);
+    UnloadFont(WindowButtonFont);
+    UnloadFont(SuccesMessageFont);
 
 
     // De-Initialization
@@ -205,9 +264,9 @@ int main()
 
 //------------------------- CREATE WINDOW BUTTON --------------------------
 // Button: FinishCreateButton logic
-static void FinishCreateButton()
+static void FinishCreateButton(char* file_name, int nb)
 {
-    // TODO: Implement control logic
+    
 }
 
 //----------------------- EDIT WINDOW BUTTONS ----------------------
@@ -228,6 +287,13 @@ static void DeleteStudentButton()
 }
 // Button: ModifyStudentButton logic
 static void ModifyStudentButton()
+{
+    // TODO: Implement control logic
+}
+
+//------------------------- INSERT WINDOW BUTTONS ------------------------
+// Button: insertWindowButton logic
+static void InsertWindowButton()
 {
     // TODO: Implement control logic
 }
