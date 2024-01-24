@@ -185,28 +185,6 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
 
-// void printTerminal(LOF_fileP f, char file_name[]){
-//     f = openLOF(f, file_name, 'o');
-//     f->tabIndex= InitTabIndex(f);
-//     int numBlock = readHeader(f, 1);
-//     while (numBlock != -1)
-//     {
-//         readBlock(f, numBlock, buffer);
-//         int i = 0;
-//         int j = 0;
-//         printf("\n\t----------BLOCK %d----------\n",numBlock);
-//         for (int i = 0; i < buffer->NB; i++) {
-//             printf("Student %d:\n", i + 1);
-//             printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
-//         }
-        
-//         numBlock = buffer->svt;
-//     }
-//     for(int i=0;i<readHeader(f,3);i++){
-//         printf("index %d - key %d - adresse %d\n",i,f->tabIndex[i].cle,f->tabIndex[i].adr_block);
-//     }
-// }
-
 
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
@@ -242,7 +220,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     }
     fprintf(studentWriter, "\n------------- INDEX ARRAY CONTENT -----------\n");
     for(int i=0;i<k;i++){
-        fprintf(studentWriter, "%d - blockID %d - lastKey %d\n", i, f->tabIndex[i].lastKey, f->tabIndex[i].blockID);
+        fprintf(studentWriter, "%d - blockID %d - lastKey %d\n", i, f->tabIndex[i].blockID, f->tabIndex[i].lastKey);
     }
 
     closeLOF(f);
@@ -333,6 +311,18 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
     int k;
     blockP NewBuffer;
+    //cas ou N == 0
+    if (N == 0)
+    {
+        f =openLOF(f, file_name, 'n');
+        allocBlock(f, &k, &buffer);
+        writeHeader(f, 1, 1);
+        writeHeader(f, 2, 1);
+        writeHeader(f, 4, 0);
+        writeBlock(f, 1, buffer);
+        return;
+    }
+    
     StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
     

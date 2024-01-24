@@ -12,7 +12,7 @@
 
 // Controls Functions Declaration
 //------------- CREATE WINDOW BUTTONS ------------
-static void FinishCreateButton(char* file_name, int nb);                // Button: FinishCreateButton logic
+static void FinishCreateButton(char* ch, int nb);                // Button: FinishCreateButton logic
 
 //------------------ EDIT WINDOW BUTTONS ----------------------
 static void InsertStudentButton();                // Button: InsertStudentButton logic
@@ -21,13 +21,16 @@ static void DeleteStudentButton();                // Button: DeleteStudentButton
 static void ModifyStudentButton();                // Button: ModifyStudentButton logic
 
 //------------ INSERT WINDOW BUTTONS -------------------
-static void InsertWindowButton();                // Button: insertWindowButton logic
+static StudentP InsertWindowButton(char* name, char* surname, int matricule);                // Button: insertWindowButton logic
 
 
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main()
 {
+
+    LOF_fileP fichierLOF;
+
     // Initialization
     //---------------------------------------------------------------------------------------
     int screenWidth = 1200;
@@ -147,6 +150,9 @@ int main()
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
+    Vector2 position = {0, 750};      // Position actuelle du rectangle
+    Vector2 destination = {1100, 750};   // Destination du rectangle
+
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -155,12 +161,28 @@ int main()
         // TODO: Implement required update logic
         //----------------------------------------------------------------------------------
 
+        // Logique de mise à jour
+        float t = GetFrameTime(); // Temps écoulé depuis la dernière frame
+        position.x += (destination.x - position.x) * t * 0.3f; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
+        position.y += (destination.y - position.y) * t * 0.3f;
+
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
             
             ClearBackground((Color){30, 40, 0, 0});
-            
+
+            //Testing moving elements :
+            DrawRectangleV(position, (Vector2){100, 150}, DARKBROWN);
+            DrawText(TextFormat("%d", 16), position.x + 40, position.y, 20, WHITE);
+            DrawLine(position.x, position.y + 20, position.x + 100, position.y + 20, WHITE);
+            DrawText("38", position.x + 40, position.y + 25, 20, WHITE);
+            DrawLine(position.x, position.y + 50, position.x + 100, position.y + 50, WHITE);
+            DrawText("66", position.x + 40, position.y + 50, 20, WHITE);
+            DrawLine(position.x, position.y + 70, position.x + 100, position.y + 70, WHITE);
+            DrawText("80", position.x + 40, position.y + 75, 20, WHITE);
+            DrawLine(position.x, position.y + 100, position.x + 100, position.y + 100, WHITE);
+
 
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
             DrawLine(80, 100, 370, 100, WHITE);
@@ -193,7 +215,8 @@ int main()
             if (CreateWindowBoxActive)
             {
                 CreateWindowBoxActive = !GuiWindowBox(layoutRecs2[0], CreateWindowBoxText);
-                DrawText("--- CREATE MENU ---", 675, 150, 20, WHITE);
+                DrawTextEx(WindowTitleFont, "CREATE MENU", (Vector2){700, 130}, WindowTitleFont.baseSize, 2, WHITE);
+                DrawLine(700, 165, 890, 165, WHITE);
 
                 if (GuiTextBox(layoutRecs2[1], FileNameTextBoxText, 128, FileNameTextBoxEditMode)) FileNameTextBoxEditMode = !FileNameTextBoxEditMode;
 
@@ -203,7 +226,10 @@ int main()
 
                 GuiLabel(layoutRecs2[4], NbStudentLabelText);
 
-                if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
+                if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) {
+                    CreateWindowBoxActive = false;
+                    FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
+                } 
             }
             //---------------------- END CREATE WINDOW ----------------------
 
@@ -212,13 +238,21 @@ int main()
             if (EditWindowActive)
             {
                 EditWindowActive = !GuiWindowBox(layoutRecs3[0], EditWindowText);
-                DrawText("--- EDIT MENU ---", 710, 100, 20, WHITE);
+                DrawTextEx(WindowTitleFont, "EDIT MENU", (Vector2){720, 80}, WindowTitleFont.baseSize, 2, WHITE);
+                DrawLine(720, 115, 870, 115, WHITE);
+
                 if (GuiTextBox(layoutRecs3[1], EditFileNameTextBoxText, 128, EditFileNameTextBoxEditMode)) EditFileNameTextBoxEditMode = !EditFileNameTextBoxEditMode;
+
                 GuiLabel(layoutRecs3[2], EditFileNameLabelText);
+
                 if (GuiButton(layoutRecs3[3], InsertStudentButtonText)) InsertStudentButton(); 
+
                 if (GuiButton(layoutRecs3[4], SearchStudentButtonText)) SearchStudentButton(); 
+
                 if (GuiButton(layoutRecs3[5], DeleteStudentButtonText)) DeleteStudentButton(); 
+
                 if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) ModifyStudentButton(); 
+
             }
             //----------------------- END EDIT WINDOW --------------------------
 
@@ -236,7 +270,9 @@ int main()
                 if (GuiTextBox(layoutRecs4[4], SurnameTextBoxText, 128, SurnameTextBoxEditMode)) SurnameTextBoxEditMode = !SurnameTextBoxEditMode;
                 GuiLabel(layoutRecs4[5], matriculeLabelText);
                 GuiLabel(layoutRecs4[6], surnameLabelText);
-                if (GuiButton(layoutRecs4[7], insertWindowButtonText)) InsertWindowButton(); 
+                if (GuiButton(layoutRecs4[7], insertWindowButtonText)) {
+                    StudentP student = InsertWindowButton(NameTextBoxText, SurnameTextBoxText, atoi(MatriculeTextBoxText));
+                } 
             }
             //-------------------------- END INSERT WINDOW ---------------------------
 
@@ -264,9 +300,16 @@ int main()
 
 //------------------------- CREATE WINDOW BUTTON --------------------------
 // Button: FinishCreateButton logic
-static void FinishCreateButton(char* file_name, int nb)
+static void FinishCreateButton(char* ch, int nb)
 {
-    
+    char ch1[20], ch2[20];
+    strcpy(ch1, ch);
+    strcpy(ch2, ch);
+    strcat(ch1, ".bin");
+    strcat(ch2, ".txt");
+    LOF_fileP fichierLOF;
+    createLOF(fichierLOF, ch1, nb);
+    extractLOF(fichierLOF, ch1, ch2);
 }
 
 //----------------------- EDIT WINDOW BUTTONS ----------------------
@@ -293,8 +336,13 @@ static void ModifyStudentButton()
 
 //------------------------- INSERT WINDOW BUTTONS ------------------------
 // Button: insertWindowButton logic
-static void InsertWindowButton()
+static StudentP InsertWindowButton(char* name, char* surname, int matricule)
 {
-    // TODO: Implement control logic
+    StudentP student = malloc(sizeof(student));
+    strcpy(student->name, name);
+    strcpy(student->surname, surname);
+    student->matricule = matricule;
+    student->deleted = 0;
+    return student;
 }
 

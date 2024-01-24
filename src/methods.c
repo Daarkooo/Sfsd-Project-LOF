@@ -333,6 +333,18 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
     int k;
     blockP NewBuffer;
+    //cas ou N == 0
+    if (N == 0)
+    {
+        f =openLOF(f, file_name, 'n');
+        allocBlock(f, &k, &buffer);
+        writeHeader(f, 1, 1);
+        writeHeader(f, 2, 1);
+        writeHeader(f, 4, 0);
+        writeBlock(f, 1, buffer);
+        return;
+    }
+    
     StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
     
