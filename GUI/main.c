@@ -23,17 +23,24 @@ static void ModifyStudentButton();                // Button: ModifyStudentButton
 //------------ INSERT WINDOW BUTTONS -------------------
 static StudentP InsertWindowButton(char* name, char* surname, int matricule);                // Button: insertWindowButton logic
 
+//--------------------- ADD WINDOW BUTTON ----------------------
+static void AddWindowButton();                // Button: Button007 logic
+
+//---------------------- SEARCH WINDOW BUTTON ---------------------------
+static void SearchWindowButton(char* ch, int matricule);                // Button: SearchWindowButton logic
+
+//------------------------ DELETE WINDOW BUTTON ------------------------------
+static void DeleteWindowButton(char* ch, int matricule);                // Button: DeleteWindowButton logic
 
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main()
 {
 
-    LOF_fileP fichierLOF;
 
     // Initialization
     //---------------------------------------------------------------------------------------
-    int screenWidth = 1200;
+    int screenWidth = 1500;
     int screenHeight = 1000;
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
@@ -136,6 +143,76 @@ int main()
     };
     //--------------------- END INSERT WINDOW ------------------
 
+    //----------------------- ADD WINDOW ---------------------------
+    // Const text
+    const char *AddWindowBoxText = "ADD WINDOW";    // WINDOWBOX: AddWindowBox
+    const char *AddNameLabelText = "NAME :";    // LABEL: AddNameLabel
+    const char *AddKeyLabelText = "Student Key :";    // LABEL: AddKeyLabel
+    const char *AddSurnameLabelText = "Surname :";    // LABEL: AddSurnameLabel
+    const char *AddWindowButtonText = "ADD";    // BUTTON: AddWindowButton
+    
+    // Define controls variables
+    bool AddWindowBoxActive = false;            // WindowBox: AddWindowBox
+    bool AddNameTextBoxEditMode = false;
+    char AddNameTextBoxText[128] = "";            // TextBox: AddNameTextBox
+    bool AddKeyTextBoxEditMode = false;
+    char AddKeyTextBoxText[128] = "";            // TextBox: AddKeyTextBox
+    bool AddSurnameTextBoxEditMode = false;
+    char AddSurnameTextBoxText[128] = "";            // TextBox: AddSurnameTextBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs5[8] = {
+        (Rectangle){ 550, 72, 408, 456 },    // WindowBox: AddWindowBox
+        (Rectangle){ 710, 168, 192, 40 },    // TextBox: AddNameTextBox
+        (Rectangle){ 710, 360, 192, 40 },    // TextBox: AddKeyTextBox
+        (Rectangle){ 710, 264, 192, 40 },    // TextBox: AddSurnameTextBox
+        (Rectangle){ 620, 176, 120, 24 },    // Label: AddNameLabel
+        (Rectangle){ 620, 368, 120, 24 },    // Label: AddKeyLabel
+        (Rectangle){ 620, 272, 120, 24 },    // Label: AddSurnameLabel
+        (Rectangle){ 700, 432, 120, 72 },    // Button: Button007
+    };
+    //------------------------- END ADD WINDOW --------------------------
+
+    //------------------------- SEARCH WINDOW -------------------------
+    // Const text
+    const char *SearchWindowBoxText = "SEARCH WINDOW";    // WINDOWBOX: SearchWindowBox
+    const char *SearchWindowButtonText = "SEARCH";    // BUTTON: SearchWindowButton
+    const char *SearchWindowLabelText = "KEY TO SEARCH";    // LABELBUTTON: SearchWindowLabel
+    
+    // Define controls variables
+    bool SearchWindowBoxActive = false;            // WindowBox: SearchWindowBox
+    bool SearchWindowValueBoxEditMode = false;
+    int SearchWindowValueBoxValue = 0;            // ValueBOx: SearchWindowValueBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs6[4] = {
+        (Rectangle){ 572, 72, 696, 384 },    // WindowBox: SearchWindowBox
+        (Rectangle){ 692, 360, 456, 48 },    // Button: SearchWindowButton
+        (Rectangle){ 884, 224, 120, 24 },    // LabelButton: SearchWindowLabel
+        (Rectangle){ 620, 264, 600, 48 },    // ValueBOx: SearchWindowValueBox
+    };
+    //--------------------------- END SEARCH WINDOW ------------------------
+
+    //-------------------------------- DELETE WINDOW -----------------------------
+    // Const text
+    const char *DeleteWindowBoxText = "DELETE WINDOW";    // WINDOWBOX: DeleteWiindowBox
+    const char *DeleteWindowButtonText = "DELETE";    // BUTTON: DeleteWindowButton
+    const char *DeleteWindowLabelText = "KEY TO DELETE";    // LABELBUTTON: DeleteWindowLabel
+    
+    // Define controls variables
+    bool DeleteWindowBoxActive = false;            // WindowBox: DeleteWiindowBox
+    bool DeleteWindowValueBoxEditMode = false;
+    int DeleteWindowValueBoxValue = 0;            // ValueBOx: DeleteWindowValueBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs7[4] = {
+        (Rectangle){ 596, 110, 696, 384 },    // WindowBox: DeleteWiindowBox
+        (Rectangle){ 716, 400, 456, 48 },    // Button: DeleteWindowButton
+        (Rectangle){ 908, 260, 120, 24 },    // LabelButton: DeleteWindowLabel
+        (Rectangle){ 644, 300, 600, 48 },    // ValueBOx: DeleteWindowValueBox
+    };
+    //------------------------------- END DELETE WINDOW --------------------------------
+
     //Loading Style File
     GuiLoadStyle("./style/style.rgs");
 
@@ -147,11 +224,18 @@ int main()
     Font WindowButtonFont = LoadFontEx("./fonts/Nippo-Medium.otf", 20, 0, 0);
     Font SuccesMessageFont = LoadFontEx("./fonts/Tanker-Regular.otf", 30, 0, 0);
 
+
+    //File Variables decalaration
+    LOF_fileP fichierLOF;
+    StudentP studentTab;
+    int add = 0;
+
+
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
     Vector2 position = {0, 750};      // Position actuelle du rectangle
-    Vector2 destination = {1100, 750};   // Destination du rectangle
+    Vector2 destination = {screenWidth - 100, 750};   // Destination du rectangle
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -163,14 +247,14 @@ int main()
 
         // Logique de mise à jour
         float t = GetFrameTime(); // Temps écoulé depuis la dernière frame
-        position.x += (destination.x - position.x) * t * 0.3f; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
-        position.y += (destination.y - position.y) * t * 0.3f;
+        position.x += (destination.x - position.x) * t * 0.7f; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
+        position.y += (destination.y - position.y) * t * 0.7f;
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
             
-            ClearBackground((Color){30, 40, 0, 0});
+            ClearBackground((Color){0, 0,40, 0});
 
             //Testing moving elements :
             DrawRectangleV(position, (Vector2){100, 150}, DARKBROWN);
@@ -187,7 +271,7 @@ int main()
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
             DrawLine(80, 100, 370, 100, WHITE);
             DrawTextEx(EmizenFontSmall, "VISUALISATION", (Vector2){10, 580}, EmizenFontSmall.baseSize, 3, WHITE);
-            DrawLine(320, 600, 1200, 600, WHITE);
+            DrawLine(320, 600, screenWidth, 600, WHITE);
             
 
             // raygui: controls drawing
@@ -245,11 +329,20 @@ int main()
 
                 GuiLabel(layoutRecs3[2], EditFileNameLabelText);
 
-                if (GuiButton(layoutRecs3[3], InsertStudentButtonText)) InsertStudentButton(); 
+                if (GuiButton(layoutRecs3[3], InsertStudentButtonText)) {
+                    insertWindowActive = true;
+                    EditWindowActive = false;
+                } 
 
-                if (GuiButton(layoutRecs3[4], SearchStudentButtonText)) SearchStudentButton(); 
+                if (GuiButton(layoutRecs3[4], SearchStudentButtonText)) {
+                    SearchWindowBoxActive = true;
+                    EditWindowActive = false;
+                } 
 
-                if (GuiButton(layoutRecs3[5], DeleteStudentButtonText)) DeleteStudentButton(); 
+                if (GuiButton(layoutRecs3[5], DeleteStudentButtonText)) {
+                    DeleteWindowBoxActive = true;
+                    EditWindowActive = false;
+                }; 
 
                 if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) ModifyStudentButton(); 
 
@@ -276,8 +369,63 @@ int main()
             }
             //-------------------------- END INSERT WINDOW ---------------------------
 
+            //-------------------------- ADD WINDOW ---------------------------------
+            // Draw controls
+            if (AddWindowBoxActive)
+            {
+                AddWindowBoxActive = !GuiWindowBox(layoutRecs5[0], AddWindowBoxText);
+                if (GuiTextBox(layoutRecs5[1], AddNameTextBoxText, 128, AddNameTextBoxEditMode)) AddNameTextBoxEditMode = !AddNameTextBoxEditMode;
+                if (GuiTextBox(layoutRecs5[2], AddKeyTextBoxText, 128, AddKeyTextBoxEditMode)) AddKeyTextBoxEditMode = !AddKeyTextBoxEditMode;
+                if (GuiTextBox(layoutRecs5[3], AddSurnameTextBoxText, 128, AddSurnameTextBoxEditMode)) AddSurnameTextBoxEditMode = !AddSurnameTextBoxEditMode;
+                GuiLabel(layoutRecs5[4], AddNameLabelText);
+                GuiLabel(layoutRecs5[5], AddKeyLabelText);
+                GuiLabel(layoutRecs5[6], AddSurnameLabelText);
+                if (GuiButton(layoutRecs5[7], AddWindowButtonText)) {
+                    add = 1;
+                }
+            }
+            //-------------------------- END ADD WINDOW -------------------------------
+
+            //---------------------------- SEARCH WINDOW -------------------------
+            // Draw controls
+            if (SearchWindowBoxActive)
+            {
+                SearchWindowBoxActive = !GuiWindowBox(layoutRecs6[0], SearchWindowBoxText);
+                if (GuiButton(layoutRecs6[1], SearchWindowButtonText)) {
+                    SearchWindowButton(EditFileNameTextBoxText, SearchWindowValueBoxValue);
+                    SearchWindowBoxActive = false;
+                    EditWindowActive = true;
+                    SearchWindowValueBoxValue = 0;
+                }
+                GuiLabel(layoutRecs6[2], SearchWindowLabelText);
+                if (GuiValueBox(layoutRecs6[3], "", &SearchWindowValueBoxValue, 0, 1000000, SearchWindowValueBoxEditMode)) SearchWindowValueBoxEditMode = !SearchWindowValueBoxEditMode;
+            }
+            //-------------------------- END SEARCH WINDOW ---------------------------
+
+            //---------------------------- DELETE WINDOW --------------------------------
+            // Draw controls
+            if (DeleteWindowBoxActive)
+            {
+                DeleteWindowBoxActive = !GuiWindowBox(layoutRecs7[0], DeleteWindowBoxText);
+                if (GuiButton(layoutRecs7[1], DeleteWindowButtonText)) {
+                    DeleteWindowButton(EditFileNameTextBoxText, DeleteWindowValueBoxValue);
+                    DeleteWindowBoxActive = false;
+                    EditWindowActive = true;
+                    DeleteWindowValueBoxValue = 0;
+                } 
+                GuiLabel(layoutRecs7[2], DeleteWindowLabelText);
+                if (GuiValueBox(layoutRecs7[3], "", &DeleteWindowValueBoxValue, 0, 100, DeleteWindowValueBoxEditMode)) DeleteWindowValueBoxEditMode = !DeleteWindowValueBoxEditMode;
+            }
+            //-------------------------- END DELETE WINDOW ------------------------------
+
         EndDrawing();
         //----------------------------------------------------------------------------------
+
+    }
+
+    for (int i = 0; i < NbStudentsSpinnerValue; i++)
+    {
+        printf("\n\n%s\n%s\n%d\n\n", studentTab[i].name, studentTab[i].surname, studentTab[i].matricule);
     }
 
     // Unload the font when done
@@ -308,8 +456,10 @@ static void FinishCreateButton(char* ch, int nb)
     strcat(ch1, ".bin");
     strcat(ch2, ".txt");
     LOF_fileP fichierLOF;
+    
     createLOF(fichierLOF, ch1, nb);
     extractLOF(fichierLOF, ch1, ch2);
+    
 }
 
 //----------------------- EDIT WINDOW BUTTONS ----------------------
@@ -346,3 +496,39 @@ static StudentP InsertWindowButton(char* name, char* surname, int matricule)
     return student;
 }
 
+//---------------------- ADD WINDOW BUTTONS --------------------------------
+// Button: Button007 logic
+static void AddWindowButton()
+{
+    // TODO: Implement control logic
+}
+
+//-------------------------- SEARCH WINDOW BUTTONS --------------------------
+// Button: SearchWindowButton logic
+static void SearchWindowButton(char* ch, int matricule)
+{
+    int blockNB, positionNB, exist;
+    LOF_fileP fichierLOF;
+    char ch1[20];
+    strcpy(ch1, ch);
+    strcat(ch1, ".bin");
+    SearchStudent(fichierLOF, ch1, matricule, &blockNB, &positionNB, &exist);
+    if (exist)
+        printf("\n\nETUDIANT TROUVE :\nBLOCK : %d\nPOSITION : %d\n\n", blockNB, positionNB);
+    else
+        printf("\n\nETUDIANT NON TROUVE\n\n");
+}
+
+//----------------------- DELETE WINDOW BUTTONS -----------------------------
+// Button: DeleteWindowButton logic
+static void DeleteWindowButton(char* ch, int matricule)
+{
+    LOF_fileP fichierLOF;
+    char ch1[20], ch2[20];
+    strcpy(ch1, ch);
+    strcpy(ch2, ch);
+    strcat(ch1, ".bin");
+    strcat(ch2, ".txt");
+    DeleteStudent(fichierLOF, ch1, matricule);
+    extractLOF(fichierLOF, ch1, ch2);
+}
