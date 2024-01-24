@@ -39,17 +39,17 @@ int main()
 
     //------------------------ MAIN MENU ------------------------
     // Const text
-    const char *createButtonText = "CREATE A NEW FILE";    // BUTTON: createButton
-    const char *editButtonText = "EDIT AN OLD FILE";    // BUTTON: editButton
-    const char *exitButtonText = "EXIT THE PROGRAM";    // BUTTON: exitButton
+    const char *createButtonText = "";    // BUTTON: createButton
+    const char *editButtonText = "";    // BUTTON: editButton
+    const char *exitButtonText = "";    // BUTTON: exitButton
     
     // Define controls variables
 
     // Define controls rectangles
     Rectangle layoutRecs[4] = {
-        (Rectangle){ 50, 150, 330, 80 },    // Button: createButton
-        (Rectangle){ 50, 300, 330, 80 },    // Button: editButton
-        (Rectangle){ 100, 450, 230, 60 },    // Button: exitButton
+        (Rectangle){ 50, 150, 350, 80 },    // Button: createButton
+        (Rectangle){ 50, 300, 350, 80 },    // Button: editButton
+        (Rectangle){ 100, 450, 250, 70 },    // Button: exitButton
     };
     //----------------------------- END MAIN MENU -----------------------------
 
@@ -108,9 +108,9 @@ int main()
     GuiLoadStyle("./style/style.rgs");
 
     //Loading Font Files
-    Font EmizenFont = LoadFontEx("./fonts/Emizen.ttf", 48, 0, 0);
-    Font CourierFont = LoadFontEx("./fonts/Courier New Bold Italic font.ttf", 40, 0, 0);
-    GuiSetFont(CourierFont);
+    Font EmizenFontBig = LoadFontEx("./fonts/Emizen.ttf", 70, 0, 0);
+    Font EmizenFontSmall = LoadFontEx("./fonts/Emizen.ttf", 48, 0, 0);
+    Font ButtonFont = LoadFontEx("./fonts/Satoshi-Black.otf", 20, 0, 0);
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
@@ -129,9 +129,9 @@ int main()
 
             ClearBackground(BLACK);
 
-            DrawTextEx(EmizenFont, "MAIN MENU", (Vector2){100, 50}, EmizenFont.baseSize, 3, WHITE);
-            DrawLine(100, 100, 300, 100, WHITE);
-            DrawTextEx(EmizenFont, "VISUALISATION", (Vector2){10, 580}, EmizenFont.baseSize, 3, WHITE);
+            DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
+            DrawLine(80, 100, 380, 100, WHITE);
+            DrawTextEx(EmizenFontSmall, "VISUALISATION", (Vector2){10, 580}, EmizenFontSmall.baseSize, 3, WHITE);
             DrawLine(320, 600, 1200, 600, WHITE);
             
 
@@ -142,11 +142,16 @@ int main()
                 CreateWindowBoxActive = true;
                 EditWindowActive = false;
             }
+            DrawTextEx(ButtonFont, "CREATE A NEW FILE", (Vector2){120, 180}, ButtonFont.baseSize, 3, WHITE);
+
             if (GuiButton(layoutRecs[1], editButtonText)) {
                 EditWindowActive = true;
                 CreateWindowBoxActive = false;
-            } 
+            }
+            DrawTextEx(ButtonFont, "EDIT AN OLD FILE", (Vector2){135, 330}, ButtonFont.baseSize, 3, WHITE);
+
             if (GuiButton(layoutRecs[2], exitButtonText)) break;
+            DrawTextEx(ButtonFont, "EXIT THE PROGRAM", (Vector2){125, 475}, ButtonFont.baseSize, 3, WHITE);
             
             //------------------------ END MAIN MENU -------------------------
 
@@ -184,8 +189,11 @@ int main()
     }
 
     // Unload the font when done
-    UnloadFont(EmizenFont);
-    UnloadFont(CourierFont);
+    UnloadFont(EmizenFontBig);
+    UnloadFont(EmizenFontSmall);
+    UnloadFont(ButtonFont);
+
+
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
