@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
                         printf("\nYOUR FILE DOESN'T EXIST\n");
                         break;
                     }
+
+                    edit_menu:
                     printf("\n1- Insert a student");
                     printf("\n2- Delete a student");
                     printf("\n3- Search for a student");
@@ -79,13 +81,13 @@ int main(int argc, char *argv[])
                             extractLOF(fichierLOF, ch1, ch2);
                             printHeader(fichierLOF, ch1);
                             
-                        break;
+                        goto edit_menu;
                     case 2:
                             printf("\nEntrez le matricule de l'etudiant a supprimer : ");
                             scanf("%d",&n);
                             DeleteStudent(fichierLOF, ch1, n);
                             extractLOF(fichierLOF, ch1, ch2);
-                        break;
+                        goto edit_menu;
                     case 3:
                         
                         do
@@ -103,10 +105,10 @@ int main(int argc, char *argv[])
                                 }
                         } while (trompe == 'o' || trompe == 'O');
                     
-                        break;
+                        goto edit_menu;
                     case 4:
 
-                        break;
+                        goto edit_menu;
                     
                     case 5:
                         goto main_menu;
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
                     
                     default:
                         printf("\nYOU CHOOSED A WRONG OPTION !\n");
-                        break;
+                        goto edit_menu;
                     }
                     break;
                 case 3:
