@@ -11,9 +11,6 @@
 
 
 // Controls Functions Declaration
-//------------- CREATE WINDOW BUTTONS ------------
-static void FinishCreateButton(char* ch, int nb);                // Button: FinishCreateButton logic
-
 //------------------ EDIT WINDOW BUTTONS ----------------------
 static void InsertStudentButton();                // Button: InsertStudentButton logic
 static void SearchStudentButton();                // Button: SearchStudentButton logic
@@ -24,7 +21,7 @@ static void ModifyStudentButton();                // Button: ModifyStudentButton
 static StudentP InsertWindowButton(char* name, char* surname, int matricule);                // Button: insertWindowButton logic
 
 //--------------------- ADD WINDOW BUTTON ----------------------
-static void AddWindowButton();                // Button: Button007 logic
+static StudentP AddWindowButton(char* name, char*surname, int matricule);                // Button: Button007 logic
 
 //---------------------- SEARCH WINDOW BUTTON ---------------------------
 static void SearchWindowButton(char* ch, int matricule);                // Button: SearchWindowButton logic
@@ -132,14 +129,14 @@ int main()
 
     // Define controls rectangles
     Rectangle layoutRecs4[8] = {
-        (Rectangle){ 600, 20, 408, 568 },    // WindowBox: insertWindow
-        (Rectangle){ 680, 140, 264, 48 },    // TextBox: NameTextBox
-        (Rectangle){ 790, 110, 120, 24 },    // Label: nameLabel
-        (Rectangle){ 680, 380, 264, 48 },    // TextBox: MatriculeTextBox
-        (Rectangle){ 680, 260, 264, 48 },    // TextBox: SurnameTextBox
-        (Rectangle){ 770, 350, 120, 24 },    // Label: matriculeLabel
-        (Rectangle){ 780, 230, 120, 24 },    // Label: surnameLabel
-        (Rectangle){ 720, 500, 168, 64 },    // Button: insertWindowButton
+        (Rectangle){ 600, 20, 600, 568 },    // WindowBox: insertWindow
+        (Rectangle){ 680, 140, 460, 48 },    // TextBox: NameTextBox
+        (Rectangle){ 890, 110, 120, 24 },    // Label: nameLabel
+        (Rectangle){ 680, 380, 460, 48 },    // TextBox: MatriculeTextBox
+        (Rectangle){ 680, 260, 460, 48 },    // TextBox: SurnameTextBox
+        (Rectangle){ 870, 350, 120, 24 },    // Label: matriculeLabel
+        (Rectangle){ 880, 230, 120, 24 },    // Label: surnameLabel
+        (Rectangle){ 820, 500, 168, 64 },    // Button: insertWindowButton
     };
     //--------------------- END INSERT WINDOW ------------------
 
@@ -227,8 +224,8 @@ int main()
 
     //File Variables decalaration
     LOF_fileP fichierLOF;
-    StudentP studentTab;
-    int add = 0;
+    StudentP studentTab = malloc(sizeof(Student)*NbStudentsSpinnerValue);
+    int creationCounter = 0;
 
 
     SetTargetFPS(60);
@@ -244,7 +241,6 @@ int main()
         //----------------------------------------------------------------------------------
         // TODO: Implement required update logic
         //----------------------------------------------------------------------------------
-
         // Logique de mise à jour
         float t = GetFrameTime(); // Temps écoulé depuis la dernière frame
         position.x += (destination.x - position.x) * t * 0.7f; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
@@ -312,7 +308,8 @@ int main()
 
                 if (GuiButton(layoutRecs2[5], FinishCreateButtonText)) {
                     CreateWindowBoxActive = false;
-                    FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
+                    AddWindowBoxActive = true;
+                    // FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
                 } 
             }
             //---------------------- END CREATE WINDOW ----------------------
@@ -354,8 +351,8 @@ int main()
             if (insertWindowActive)
             {
                 insertWindowActive = !GuiWindowBox(layoutRecs4[0], insertWindowText);
-                DrawTextEx(WindowTitleFont, "INSERT A STUDENT", (Vector2){680, 50}, WindowTitleFont.baseSize, 2, WHITE);
-                DrawLine(670, 85, 950, 85, WHITE);
+                DrawTextEx(WindowTitleFont, "INSERT A STUDENT", (Vector2){780, 50}, WindowTitleFont.baseSize, 2, WHITE);
+                DrawLine(780, 85, 1040, 85, WHITE);
 
                 if (GuiTextBox(layoutRecs4[1], NameTextBoxText, 128, NameTextBoxEditMode)) NameTextBoxEditMode = !NameTextBoxEditMode;
                 GuiLabel(layoutRecs4[2], nameLabelText);
@@ -381,7 +378,30 @@ int main()
                 GuiLabel(layoutRecs5[5], AddKeyLabelText);
                 GuiLabel(layoutRecs5[6], AddSurnameLabelText);
                 if (GuiButton(layoutRecs5[7], AddWindowButtonText)) {
-                    add = 1;
+                    if (creationCounter < NbStudentsSpinnerValue - 1)
+                    {
+                        StudentP student = AddWindowButton(AddNameTextBoxText, AddSurnameTextBoxText, atoi(AddKeyTextBoxText));
+                        studentCopy(studentTab + creationCounter, student);
+                        strcpy(AddNameTextBoxText, "");
+                        strcpy(AddSurnameTextBoxText, "");
+                        strcpy(AddKeyTextBoxText, "");
+                        creationCounter++;
+                    } else {
+                        StudentP student = AddWindowButton(AddNameTextBoxText, AddSurnameTextBoxText, atoi(AddKeyTextBoxText));
+                        studentCopy(studentTab + creationCounter, student);
+                        char ch1[20], ch2[20];
+                        strcpy(ch1, FileNameTextBoxText);
+                        strcpy(ch2, FileNameTextBoxText);
+                        strcat(ch1, ".bin");
+                        strcat(ch2, ".txt");
+                        creationCounter = 0;
+                        strcpy(AddNameTextBoxText, "");
+                        strcpy(AddSurnameTextBoxText, "");
+                        strcpy(AddKeyTextBoxText, "");
+                        AddWindowBoxActive = false;
+                        createLOF(fichierLOF, ch1, studentTab, NbStudentsSpinnerValue);
+                        extractLOF(fichierLOF, ch1, ch2);
+                    }
                 }
             }
             //-------------------------- END ADD WINDOW -------------------------------
@@ -414,7 +434,7 @@ int main()
                     DeleteWindowValueBoxValue = 0;
                 } 
                 GuiLabel(layoutRecs7[2], DeleteWindowLabelText);
-                if (GuiValueBox(layoutRecs7[3], "", &DeleteWindowValueBoxValue, 0, 100, DeleteWindowValueBoxEditMode)) DeleteWindowValueBoxEditMode = !DeleteWindowValueBoxEditMode;
+                if (GuiValueBox(layoutRecs7[3], "", &DeleteWindowValueBoxValue, 0, 1000000, DeleteWindowValueBoxEditMode)) DeleteWindowValueBoxEditMode = !DeleteWindowValueBoxEditMode;
             }
             //-------------------------- END DELETE WINDOW ------------------------------
 
@@ -423,10 +443,6 @@ int main()
 
     }
 
-    for (int i = 0; i < NbStudentsSpinnerValue; i++)
-    {
-        printf("\n\n%s\n%s\n%d\n\n", studentTab[i].name, studentTab[i].surname, studentTab[i].matricule);
-    }
 
     // Unload the font when done
     UnloadFont(EmizenFontBig);
@@ -446,21 +462,6 @@ int main()
 }
 
 
-//------------------------- CREATE WINDOW BUTTON --------------------------
-// Button: FinishCreateButton logic
-static void FinishCreateButton(char* ch, int nb)
-{
-    char ch1[20], ch2[20];
-    strcpy(ch1, ch);
-    strcpy(ch2, ch);
-    strcat(ch1, ".bin");
-    strcat(ch2, ".txt");
-    LOF_fileP fichierLOF;
-    
-    createLOF(fichierLOF, ch1, nb);
-    extractLOF(fichierLOF, ch1, ch2);
-    
-}
 
 //----------------------- EDIT WINDOW BUTTONS ----------------------
 // Button: InsertStudentButton logic
@@ -498,9 +499,14 @@ static StudentP InsertWindowButton(char* name, char* surname, int matricule)
 
 //---------------------- ADD WINDOW BUTTONS --------------------------------
 // Button: Button007 logic
-static void AddWindowButton()
+static StudentP AddWindowButton(char* name, char*surname, int matricule)
 {
-    // TODO: Implement control logic
+    StudentP student = malloc(sizeof(student));
+    strcpy(student->name, name);
+    strcpy(student->surname, surname);
+    student->matricule = matricule;
+    student->deleted = 0;
+    return student;
 }
 
 //-------------------------- SEARCH WINDOW BUTTONS --------------------------

@@ -92,7 +92,7 @@ void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks);  //mettre 
 
 //------------------------------------------------------------------------------
 //fonctions LOF specifiques pour ce projet
-void createLOF(LOF_fileP f, char file_name[], int N);     //creation du fichier avec N enregistrement logique
+void createLOF(LOF_fileP f, char file_name[], StudentP StudentTab, int N);     //creation du fichier avec N enregistrement logique
 void insertStudent(LOF_fileP f, char file_name[], char file_txt[], StudentP student);  //insertion d'un novelle enregistrement dans le fichier
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
 void DeleteStudent(LOF_fileP f, char file_name[], int matricule); //suppression de l'enregistrement si il existe

@@ -207,7 +207,7 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
                 if (buffer->tab[i].deleted == 0)
                 {
                     fprintf(studentWriter, "Student %d:\n", num);
-                    fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
+                    fprintf(studentWriter, "\tNOM : %s\n\tPRENOM : %s\n\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
                     j++;
                     num++;
                 }
@@ -307,8 +307,7 @@ void readIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks) {
     rewind(f->file);
 }  //mettre le contenue du bloc numero K dans
 
-void createLOF(LOF_fileP f, char file_name[], int N) {
-    StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
+void createLOF(LOF_fileP f, char file_name[], StudentP StudentTab, int N) {
     int k;
     blockP NewBuffer;
     //cas ou N == 0
@@ -322,8 +321,7 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
         writeBlock(f, 1, buffer);
         return;
     }
-    
-    StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
+
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
     
     //insertion des enregistrement en mode FIFO :
