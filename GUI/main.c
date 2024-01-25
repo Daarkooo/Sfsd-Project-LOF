@@ -73,7 +73,7 @@ int main()
     const char *CreateWindowBoxText = "CREATE WINDOW";    // WINDOWBOX: CreateWindowBox
     const char *FileNameLabelText = "FILE NAME";    // LABEL: FileNameLabel
     const char *NbStudentLabelText = "NUMBER OF STUDENTS";    // LABEL: NbStudentLabel
-    const char *FinishCreateButtonText = "FINISH";    // BUTTON: FinishCreateButton
+    const char *FinishCreateButtonText = "";    // BUTTON: FinishCreateButton
     
     // Define controls variables
     bool CreateWindowBoxActive = false;            // WindowBox: CreateWindowBox
@@ -97,10 +97,10 @@ int main()
     // Const text
     const char *EditWindowText = "EDIT WINDOW";    // WINDOWBOX: EditWindow
     const char *EditFileNameLabelText = "FILE NAME";    // LABEL: EditFileNameLabel
-    const char *InsertStudentButtonText = "INSERT STUDENT";    // BUTTON: InsertStudentButton
-    const char *SearchStudentButtonText = "SEARCH STUDENT";    // BUTTON: SearchStudentButton
-    const char *DeleteStudentButtonText = "DELETE STUDENT";    // BUTTON: DeleteStudentButton
-    const char *ModifyStudentButtonText = "MODIFY STUDENT";    // BUTTON: ModifyStudentButton
+    const char *InsertStudentButtonText = "";    // BUTTON: InsertStudentButton
+    const char *SearchStudentButtonText = "";    // BUTTON: SearchStudentButton
+    const char *DeleteStudentButtonText = "";    // BUTTON: DeleteStudentButton
+    const char *ModifyStudentButtonText = "";    // BUTTON: ModifyStudentButton
     
     // Define controls variables
     bool EditWindowActive = false;            // WindowBox: EditWindow
@@ -400,7 +400,10 @@ int main()
                     CreateWindowBoxActive = false;
                     AddWindowBoxActive = true;
                     // FinishCreateButton(FileNameTextBoxText, NbStudentsSpinnerValue);
-                } 
+                }
+                DrawTextEx(WindowButtonFont, "FINISH", (Vector2){778, 415}, WindowButtonFont.baseSize, 2, WHITE);
+                DrawLine(700, 165, 890, 165, WHITE);
+
             }
             //---------------------- END CREATE WINDOW ----------------------
 
@@ -434,7 +437,11 @@ int main()
                 if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) {
                     ModifyWindowBoxActive = true;
                     EditWindowActive = false;
-                }; 
+                };
+                DrawTextEx(WindowButtonFont, "INSERT STUDENT", (Vector2){560, 360}, WindowButtonFont.baseSize, 2, WHITE);
+                DrawTextEx(WindowButtonFont, "DELETE STUDENT", (Vector2){900, 360}, WindowButtonFont.baseSize, 2, WHITE);
+                DrawTextEx(WindowButtonFont, "SEARCH STUDENT", (Vector2){560, 470}, WindowButtonFont.baseSize, 2, WHITE);
+                DrawTextEx(WindowButtonFont, "MODIFY STUDENT", (Vector2){900, 470}, WindowButtonFont.baseSize, 2, WHITE);
 
             }
             //----------------------- END EDIT WINDOW --------------------------
@@ -474,6 +481,7 @@ int main()
                 if (GuiTextBox(layoutRecs5[3], AddSurnameTextBoxText, 128, AddSurnameTextBoxEditMode)) AddSurnameTextBoxEditMode = !AddSurnameTextBoxEditMode;
                 GuiLabel(layoutRecs5[4], AddNameLabelText);
                 GuiLabel(layoutRecs5[5], AddKeyLabelText);
+                DrawTextEx(WindowTitleFont, TextFormat("ADD STUDENT NUMBER %d", creationCounter+1), (Vector2){600, 100}, WindowTitleFont.baseSize, 2, WHITE);
                 GuiLabel(layoutRecs5[6], AddSurnameLabelText);
                 if (GuiButton(layoutRecs5[7], AddWindowButtonText)) {
                     if (creationCounter < NbStudentsSpinnerValue - 1)
