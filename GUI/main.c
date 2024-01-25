@@ -24,13 +24,19 @@ static void InsertWindowButton(char* ch, char* name, char* surname, int matricul
 static StudentP AddWindowButton(char* name, char*surname, int matricule);                // Button: Button007 logic
 
 //---------------------- SEARCH WINDOW BUTTON ---------------------------
-static void SearchWindowButton(char* ch, int matricule);                // Button: SearchWindowButton logic
+static int SearchWindowButton(char* ch, int matricule, int* blockNB, int* positionNB);                // Button: SearchWindowButton logic
 
 //------------------------ DELETE WINDOW BUTTON ------------------------------
 static void DeleteWindowButton(char* ch, int matricule);                // Button: DeleteWindowButton logic
 
 //--------------------------- MODIFY WINDOW BUTTON --------------------------------
 static void ModifyButton(char* ch, char* name, char* surname, int matricule);                // Button: ModifyButton logic
+
+//------------------------------ VISUALISATION FUNCTIONS ---------------------------
+void MoveObject(Vector2 *position, Vector2 *destination, float speed);
+void DrawStudent(StudentP student, int posX, int posY);
+void DrawBlock(blockP block, int posX, int posY);
+void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY);
 
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -40,7 +46,7 @@ int main()
 
     // Initialization
     //---------------------------------------------------------------------------------------
-    int screenWidth = 1500;
+    int screenWidth = 1800;
     int screenHeight = 1000;
 
     InitWindow(screenWidth, screenHeight, "LOF GUI");
@@ -252,13 +258,30 @@ int main()
     Font ButtonFont = LoadFontEx("./fonts/Satoshi-Black.otf", 20, 0, 0);
     Font WindowTitleFont = LoadFontEx("./fonts/Hoover-Bold.otf", 35, 0, 0);
     Font WindowButtonFont = LoadFontEx("./fonts/Nippo-Medium.otf", 20, 0, 0);
-    Font SuccesMessageFont = LoadFontEx("./fonts/Tanker-Regular.otf", 30, 0, 0);
+    Font SuccesMessageFont = LoadFontEx("./fonts/Tanker-Regular.otf", 50, 0, 0);
+    Font VisuContentFont = LoadFontEx("./fonts/CourierPrime-Regular.ttf", 20, 0, 0);
+    
 
 
     //File Variables decalaration
     LOF_fileP fichierLOF;
     StudentP studentTab = malloc(sizeof(Student)*NbStudentsSpinnerValue);
     int creationCounter = 0;
+    bool successSearchMessage = false;
+    bool failSearchMessage = false;
+    float messageTimer = 0.0f;
+    int exist;
+    int blockNB, positionNB;
+
+    //------------ DrawStudent test -----------
+    // StudentP student1 = malloc(sizeof(Student));
+    // strcpy(student1->name, "hamid");
+    // strcpy(student1->surname, "chababi");
+    // student1->matricule = 123;
+
+    //------------ DrawBlock test ------------
+    // blockP block = malloc(sizeof(block));
+    // createBlock(block);
 
 
     SetTargetFPS(60);
@@ -274,10 +297,7 @@ int main()
         //----------------------------------------------------------------------------------
         // TODO: Implement required update logic
         //----------------------------------------------------------------------------------
-        // Logique de mise à jour
-        float t = GetFrameTime(); // Temps écoulé depuis la dernière frame
-        position.x += (destination.x - position.x) * t * 0.7f; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
-        position.y += (destination.y - position.y) * t * 0.7f;
+        MoveObject(&position, &destination, 0.7f);
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -295,7 +315,44 @@ int main()
             DrawLine(position.x, position.y + 70, position.x + 100, position.y + 70, WHITE);
             DrawText("80", position.x + 40, position.y + 75, 20, WHITE);
             DrawLine(position.x, position.y + 100, position.x + 100, position.y + 100, WHITE);
+            
+            //----------------- SUCCESS AND FAIL MESSAGES -------------------
+            if (successSearchMessage)
+            {
+                DrawTextEx(SuccesMessageFont, TextFormat("Student exists\n\n\nBlock:  %d\n\n\nPosition:  %d", blockNB, positionNB), (Vector2){1400, 200}, SuccesMessageFont.baseSize, 4, GREEN);
+            }
+            if (successSearchMessage) {
+                messageTimer -= 0.03;
 
+                if (messageTimer <= 0.0f) {
+                    successSearchMessage = false;  // Réinitialiser le message après la durée spécifiée
+                }
+            }
+
+            if (failSearchMessage)
+            {
+                DrawTextEx(SuccesMessageFont, "Student doesn't exist", (Vector2){1300, 200}, SuccesMessageFont.baseSize, 4, RED);
+            }
+            if (failSearchMessage) {
+                messageTimer -= 0.03;
+
+                if (messageTimer <= 0.0f) {
+                    failSearchMessage = false;  // Réinitialiser le message après la durée spécifiée
+                }
+            }
+            //---------------------- END SUCCESS AND FAIL MESSAGES -----------------------
+
+            //-------------- TEST DRAW STUDENT -------------
+            // DrawStudent(student1, 50, 800);
+
+            // //--------------- TEST DRAW BLOCK ------------
+            // DrawBlock(block, 50, 700);
+
+            //--------------- TEST DRAW FILE ------------
+            // DrawLOF(fichierLOF, "adel.bin", 50, 700);
+            
+            
+            
 
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
             DrawLine(80, 100, 370, 100, WHITE);
@@ -453,7 +510,15 @@ int main()
             {
                 SearchWindowBoxActive = !GuiWindowBox(layoutRecs6[0], SearchWindowBoxText);
                 if (GuiButton(layoutRecs6[1], SearchWindowButtonText)) {
-                    SearchWindowButton(EditFileNameTextBoxText, SearchWindowValueBoxValue);
+                    exist = SearchWindowButton(EditFileNameTextBoxText, SearchWindowValueBoxValue, &blockNB, &positionNB);
+                    if (exist == 1) {
+                        successSearchMessage = true;
+                        messageTimer = 5.0f;
+                    } else {
+                        failSearchMessage = true;
+                        messageTimer = 5.0f;
+                    }
+                    
                     SearchWindowBoxActive = false;
                     EditWindowActive = true;
                     SearchWindowValueBoxValue = 0;
@@ -583,18 +648,16 @@ static StudentP AddWindowButton(char* name, char*surname, int matricule)
 
 //-------------------------- SEARCH WINDOW BUTTONS --------------------------
 // Button: SearchWindowButton logic
-static void SearchWindowButton(char* ch, int matricule)
+static int SearchWindowButton(char* ch, int matricule, int* blockNB, int* positionNB)
 {
-    int blockNB, positionNB, exist;
+    int exist;
     LOF_fileP fichierLOF;
     char ch1[20];
     strcpy(ch1, ch);
     strcat(ch1, ".bin");
-    SearchStudent(fichierLOF, ch1, matricule, &blockNB, &positionNB, &exist);
-    if (exist)
-        printf("\n\nETUDIANT TROUVE :\nBLOCK : %d\nPOSITION : %d\n\n", blockNB, positionNB);
-    else
-        printf("\n\nETUDIANT NON TROUVE\n\n");
+    SearchStudent(fichierLOF, ch1, matricule, blockNB, positionNB, &exist);
+    return exist;
+    
 }
 
 //----------------------- DELETE WINDOW BUTTONS -----------------------------
@@ -629,4 +692,68 @@ static void ModifyButton(char* ch, char* name, char* surname, int matricule)
 
     ModifyStudent(fichierLOF, ch1, student);
     extractLOF(fichierLOF, ch1, ch2);
+}
+
+
+
+
+//--------------------------- VISUALISATION FUNCTIONS --------------------------------------
+void MoveObject(Vector2 *position, Vector2 *destination, float speed) {
+    // Logique de mise à jour
+    float t = GetFrameTime(); // Temps écoulé depuis la dernière frame
+    position->x += (destination->x - position->x) * t * speed; // Ajustez la valeur 2.0f pour contrôler la vitesse de déplacement
+    position->y += (destination->y - position->y) * t * speed;
+}
+
+void DrawStudent(StudentP student, int posX, int posY) {
+    Font VisuContentFont = LoadFontEx("./fonts/CourierPrime-Regular.ttf", 18, 0, 0);
+    DrawRectangle(posX, posY, 280, 40, BLUE);
+    DrawTextEx(VisuContentFont, student->name, (Vector2){posX + 3, posY + 10}, VisuContentFont.baseSize, 0, WHITE);
+    DrawLine(posX + 110, posY, posX + 110, posY + 40, WHITE);
+    DrawTextEx(VisuContentFont, student->surname, (Vector2){posX + 113, posY + 10}, VisuContentFont.baseSize, 0, WHITE);
+    DrawLine(posX + 220, posY, posX + 220, posY + 40, WHITE);
+    char matricule[20];
+    sprintf(matricule, "%d", student->matricule);
+    DrawTextEx(VisuContentFont, matricule, (Vector2){posX + 223, posY + 10}, VisuContentFont.baseSize, 0, WHITE);
+}
+
+void DrawBlock(blockP block, int posX, int posY) {
+    DrawRectangleRounded((Rectangle){posX, posY, 300, 20 + FACT_B*40}, 0.1, 0, DARKBLUE);
+    int i = 0;
+    int j = 0;
+    while (i < FACT_B && j < block->NB)
+    {
+        if (block->tab[i].deleted == 0)
+        {
+            DrawStudent(block->tab + i, posX + 10, 10 + posY + j*40);
+            DrawLine(posX + 10, 10 + posY + j*40, posX + 10 + 280, 10 + posY + j*40, WHITE);
+            j++;
+        }
+        i++;
+    }
+    DrawLine(posX + 10 + 280, 10 + posY, posX + 10 + 280, 10 + posY + j*40, WHITE);
+    DrawLine(posX + 10, 10 + posY + j*40, posX + 10 + 280, 10 + posY + j*40, WHITE);
+    DrawLine(posX + 10, 10 + posY, posX + 10, 10 + posY + j*40, WHITE);
+}
+
+void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY) {
+    f = openLOF(f, file_name, 'o');
+    int k = readHeader(f, 1);
+    int i = 0;
+    while (k != -1)
+    {
+        buffer = malloc(sizeof(block));
+        readBlock(f, k, buffer);
+        if (buffer->svt != -1)
+        {
+            DrawBlock(buffer, posX + i*350, posY);
+            DrawLine(300 + posX + i*350, (20 + FACT_B*40)/2 + posY, 350 + posX + i*350, (20 + FACT_B*40)/2 + posY, WHITE);
+        }
+        else {
+            DrawBlock(buffer, posX + i*350, posY);
+        }
+        i++;
+        k = buffer->svt;
+    }
+    closeLOF(f);
 }

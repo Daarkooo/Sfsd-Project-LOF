@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FACT_B 3 // facteur de blocage 
+#define FACT_B 4 // facteur de blocage 
 
 // le type de la table d'index 
 
