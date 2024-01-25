@@ -18,7 +18,7 @@ static void DeleteStudentButton();                // Button: DeleteStudentButton
 static void ModifyStudentButton();                // Button: ModifyStudentButton logic
 
 //------------ INSERT WINDOW BUTTONS -------------------
-static StudentP InsertWindowButton(char* name, char* surname, int matricule);                // Button: insertWindowButton logic
+static void InsertWindowButton(char* ch, char* name, char* surname, int matricule);                // Button: insertWindowButton logic
 
 //--------------------- ADD WINDOW BUTTON ----------------------
 static StudentP AddWindowButton(char* name, char*surname, int matricule);                // Button: Button007 logic
@@ -28,6 +28,9 @@ static void SearchWindowButton(char* ch, int matricule);                // Butto
 
 //------------------------ DELETE WINDOW BUTTON ------------------------------
 static void DeleteWindowButton(char* ch, int matricule);                // Button: DeleteWindowButton logic
+
+//--------------------------- MODIFY WINDOW BUTTON --------------------------------
+static void ModifyButton(char* ch, char* name, char* surname, int matricule);                // Button: ModifyButton logic
 
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -210,6 +213,36 @@ int main()
     };
     //------------------------------- END DELETE WINDOW --------------------------------
 
+    //----------------------------- MODIFY WINDOW ---------------------------------
+    // Const text
+    const char *ModifyWindowBoxText = "MODIFY WINDOW";    // WINDOWBOX: ModifyWindowBox
+    const char *ModifyButtonText = "MODIFY";    // BUTTON: ModifyButton
+    const char *ModifyNameLabelText = "NEW NAME";    // LABEL: ModifyNameLabel
+    const char *ModifySurnameLabelText = "NEW SURNAME";    // LABEL: ModifySurnameLabel
+    const char *ModifyKeyLabelText = "STUDENT KEY";    // LABEL: ModifyKeyLabel
+    
+    // Define controls variables
+    bool ModifyWindowBoxActive = false;            // WindowBox: ModifyWindowBox
+    bool ModifySurnameTextBoxEditMode = false;
+    char ModifySurnameTextBoxText[128] = "";            // TextBox: ModifySurnameTextBox
+    bool ModifyNameTextBoxEditMode = false;
+    char ModifyNameTextBoxText[128] = "";            // TextBox: ModifyNameTextBox
+    bool ModifyValueBoxEditMode = false;
+    int ModifyValueBoxValue = 0;            // ValueBOx: ModifyValueBox
+
+    // Define controls rectangles
+    Rectangle layoutRecs8[8] = {
+        (Rectangle){ 644, 72, 744, 480 },    // WindowBox: ModifyWindowBox
+        (Rectangle){ 1076, 360, 240, 48 },    // TextBox: ModifySurnameTextBox
+        (Rectangle){ 716, 360, 240, 48 },    // TextBox: ModifyNameTextBox
+        (Rectangle){ 956, 472, 120, 56 },    // Button: ModifyButton
+        (Rectangle){ 884, 240, 432, 48 },    // ValueBOx: ModifyValueBox
+        (Rectangle){ 788, 328, 120, 24 },    // Label: ModifyNameLabel
+        (Rectangle){ 1148, 328, 120, 24 },    // Label: ModifySurnameLabel
+        (Rectangle){ 764, 256, 120, 24 },    // Label: ModifyKeyLabel
+    };
+    //----------------------------- MODIFY WINDOW END -------------------------------
+
     //Loading Style File
     GuiLoadStyle("./style/style.rgs");
 
@@ -341,7 +374,10 @@ int main()
                     EditWindowActive = false;
                 }; 
 
-                if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) ModifyStudentButton(); 
+                if (GuiButton(layoutRecs3[6], ModifyStudentButtonText)) {
+                    ModifyWindowBoxActive = true;
+                    EditWindowActive = false;
+                }; 
 
             }
             //----------------------- END EDIT WINDOW --------------------------
@@ -361,7 +397,12 @@ int main()
                 GuiLabel(layoutRecs4[5], matriculeLabelText);
                 GuiLabel(layoutRecs4[6], surnameLabelText);
                 if (GuiButton(layoutRecs4[7], insertWindowButtonText)) {
-                    StudentP student = InsertWindowButton(NameTextBoxText, SurnameTextBoxText, atoi(MatriculeTextBoxText));
+                    InsertWindowButton(EditFileNameTextBoxText, NameTextBoxText, SurnameTextBoxText, atoi(MatriculeTextBoxText));
+                    insertWindowActive = false;
+                    EditWindowActive = true;
+                    strcpy(NameTextBoxText, "");
+                    strcpy(SurnameTextBoxText, "");
+                    strcpy(MatriculeTextBoxText, "");
                 } 
             }
             //-------------------------- END INSERT WINDOW ---------------------------
@@ -438,6 +479,28 @@ int main()
             }
             //-------------------------- END DELETE WINDOW ------------------------------
 
+            //------------------------------- MODIFY WINDOW ----------------------------------
+            // Draw controls
+            if (ModifyWindowBoxActive)
+            {
+                ModifyWindowBoxActive = !GuiWindowBox(layoutRecs8[0], ModifyWindowBoxText);
+                if (GuiTextBox(layoutRecs8[1], ModifySurnameTextBoxText, 128, ModifySurnameTextBoxEditMode)) ModifySurnameTextBoxEditMode = !ModifySurnameTextBoxEditMode;
+                if (GuiTextBox(layoutRecs8[2], ModifyNameTextBoxText, 128, ModifyNameTextBoxEditMode)) ModifyNameTextBoxEditMode = !ModifyNameTextBoxEditMode;
+                if (GuiButton(layoutRecs8[3], ModifyButtonText)) {
+                    ModifyButton(EditFileNameTextBoxText, ModifyNameTextBoxText, ModifySurnameTextBoxText, ModifyValueBoxValue);
+                    ModifyWindowBoxActive = false;
+                    EditWindowActive = true;
+                    ModifyValueBoxValue = 0;
+                    strcpy(ModifyNameTextBoxText, "");
+                    strcpy(ModifySurnameTextBoxText, "");
+                }
+                if (GuiValueBox(layoutRecs8[4], "", &ModifyValueBoxValue, 0, 1000000, ModifyValueBoxEditMode)) ModifyValueBoxEditMode = !ModifyValueBoxEditMode;
+                GuiLabel(layoutRecs8[5], ModifyNameLabelText);
+                GuiLabel(layoutRecs8[6], ModifySurnameLabelText);
+                GuiLabel(layoutRecs8[7], ModifyKeyLabelText);
+            }
+            //---------------------------- END MODIFY WINDOW ----------------------------
+
         EndDrawing();
         //----------------------------------------------------------------------------------
 
@@ -487,14 +550,23 @@ static void ModifyStudentButton()
 
 //------------------------- INSERT WINDOW BUTTONS ------------------------
 // Button: insertWindowButton logic
-static StudentP InsertWindowButton(char* name, char* surname, int matricule)
+static void InsertWindowButton(char* ch, char* name, char* surname, int matricule)
 {
+    LOF_fileP fichierLOF;
+    char ch1[20], ch2[20];
+    strcpy(ch1, ch);
+    strcpy(ch2, ch);
+    strcat(ch1, ".bin");
+    strcat(ch2, ".txt");
     StudentP student = malloc(sizeof(student));
     strcpy(student->name, name);
     strcpy(student->surname, surname);
     student->matricule = matricule;
     student->deleted = 0;
-    return student;
+    
+    fichierLOF = openLOF(fichierLOF, ch1, 'o');
+    insertStudent(fichierLOF, ch1, student);
+    extractLOF(fichierLOF, ch1, ch2);
 }
 
 //---------------------- ADD WINDOW BUTTONS --------------------------------
@@ -536,5 +608,25 @@ static void DeleteWindowButton(char* ch, int matricule)
     strcat(ch1, ".bin");
     strcat(ch2, ".txt");
     DeleteStudent(fichierLOF, ch1, matricule);
+    extractLOF(fichierLOF, ch1, ch2);
+}
+
+//---------------------------- MODIFY WINDOW BUTTON -------------------------------
+// Button: ModifyButton logic
+static void ModifyButton(char* ch, char* name, char* surname, int matricule)
+{
+    LOF_fileP fichierLOF;
+    char ch1[20], ch2[20];
+    strcpy(ch1, ch);
+    strcpy(ch2, ch);
+    strcat(ch1, ".bin");
+    strcat(ch2, ".txt");
+    StudentP student = malloc(sizeof(student));
+    strcpy(student->name, name);
+    strcpy(student->surname, surname);
+    student->matricule = matricule;
+    student->deleted = 0;
+
+    ModifyStudent(fichierLOF, ch1, student);
     extractLOF(fichierLOF, ch1, ch2);
 }
