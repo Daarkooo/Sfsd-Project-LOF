@@ -361,8 +361,6 @@ int main()
             
             
             
-            
-
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
             DrawLine(80, 100, 370, 100, WHITE);
             DrawTextEx(EmizenFontSmall, "VISUALISATION", (Vector2){10, 580}, EmizenFontSmall.baseSize, 3, WHITE);
@@ -765,6 +763,7 @@ void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY) {
         {
             DrawBlock(buffer, posX + i*350, posY);
             DrawLine(300 + posX + i*350, (20 + FACT_B*40)/2 + posY, 350 + posX + i*350, (20 + FACT_B*40)/2 + posY, WHITE);
+            DrawTriangle((Vector2){340 + posX + i*350, (20 + FACT_B*40)/2 + posY - 10}, (Vector2){340 + posX + i*350, (20 + FACT_B*40)/2 + posY + 10}, (Vector2){350 + posX + i*350, (20 + FACT_B*40)/2 + posY}, WHITE);
         }
         else {
             DrawBlock(buffer, posX + i*350, posY);
