@@ -1,3 +1,4 @@
+
 #include "methods.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -195,6 +196,28 @@ void allocBlock(LOF_fileP f, int* K, blockP* buffer) {
 }   //allouer un nouveau bloc et l'initialiser avec le contenue du tampom
 
 
+// void printTerminal(LOF_fileP f, char file_name[]){
+//     f = openLOF(f, file_name, 'o');
+//     f->tabIndex= InitTabIndex(f);
+//     int numBlock = readHeader(f, 1);
+//     while (numBlock != -1)
+//     {
+//         readBlock(f, numBlock, buffer);
+//         int i = 0;
+//         int j = 0;
+//         printf("\n\t----------BLOCK %d----------\n",numBlock);
+//         for (int i = 0; i < buffer->NB; i++) {
+//             printf("Student %d:\n", i + 1);
+//             printStudent((buffer->tab) + i); // Afficher les informations du i-ème étudiant
+//         }
+        
+//         numBlock = buffer->svt;
+//     }
+//     for(int i=0;i<readHeader(f,3);i++){
+//         printf("index %d - key %d - adresse %d\n",i,f->tabIndex[i].cle,f->tabIndex[i].adr_block);
+//     }
+// }
+
 
 void extractLOF(LOF_fileP f, char file_name[], char result[]){
     f = openLOF(f, file_name, 'o');
@@ -204,38 +227,64 @@ void extractLOF(LOF_fileP f, char file_name[], char result[]){
     int i;
     int k=0;
     int num;
-    while (numBlock != -1)
+    
+    while(numBlock != -1)
     {
         readBlock(f, numBlock, buffer);
-        if(buffer->NB !=0){
-            int i = 0;
-            int j = 0;
-            int num=1;
-            fprintf(studentWriter, "\n\t----------BLOCK %d----------\n", numBlock);
-            while (i < FACT_B && j < buffer->NB)
+        int j = 0;
+        int i = 0;
+        fprintf(studentWriter, "\n\t----------BLOCK %d__(id:%d)----------\n", k+1,numBlock);
+        if(buffer->svt != -1){
+        
+            while (i < FACT_B && j <= buffer->NB )
             {
-                if (buffer->tab[i].deleted == 0)
-                {
-                    fprintf(studentWriter, "Student %d:\n", num);
-                    fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
-                    j++;
-                    num++;
+                if(buffer->tab[i].matricule != 0){
+                    if (buffer->tab[i].deleted == 0)
+                    {
+                        fprintf(studentWriter, "Student %d:\n", i+1);
+                        fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
+                        j++;
+                    }else{
+                        fprintf(studentWriter, "Student %d:\n", i+1);
+                        fprintf(studentWriter, "\tDeleted: True\n\tMATRICULE (cle) : %d\n", buffer->tab[i].matricule); // le cas de l'etudiant supprime logiquemenet 
+
+                    }  
                 }
-                
                 i++;
             }
-            k++;
+        }else{
+    
+            while (i < FACT_B && j < buffer->NB  && buffer->tab[i].matricule != 0)
+            {
+                if(buffer->tab[i].matricule != 0){
+                    if (buffer->tab[i].deleted == 0)
+                    {
+                        fprintf(studentWriter, "Student %d:\n", i+1);
+                        fprintf(studentWriter, "\tNOM : %s\tPRENOM : %s\tMATRICULE (cle) : %d\n", buffer->tab[i].name, buffer->tab[i].surname, buffer->tab[i].matricule); // Afficher les informations du i-ème étudiant
+                        j++;
+                    }else{
+                        fprintf(studentWriter, "Student %d:\n", i+1);
+                        fprintf(studentWriter, "\tDeleted: True\n\tMATRICULE (cle) : %d\n", buffer->tab[i].matricule); // le cas de l'etudiant supprime logiquemenet 
+
+                    }  
+                }
+                i++;
+            }
         }
+        k++;
+
         numBlock = buffer->svt;
     }
+
     fprintf(studentWriter, "\n------------- INDEX ARRAY CONTENT -----------\n");
     for(int i=0;i<k;i++){
-        fprintf(studentWriter, "%d - blockID %d - lastKey %d\n", i, f->tabIndex[i].blockID, f->tabIndex[i].lastKey);
+        fprintf(studentWriter, "block %d - ID %d - lastKey %d\n", i+1, f->tabIndex[i].blockID, f->tabIndex[i].lastKey);
     }
 
     closeLOF(f);
     fclose(studentWriter);
 }
+
 
 StudentP scanTab(StudentP t, int length) {
     t = malloc(sizeof(Student) * length);
@@ -311,6 +360,7 @@ IndexP InitTabIndex(LOF_fileP f){
     return tabIndex;
 }
 
+
 void writeIndexTab(LOF_fileP f, IndexP tab, int length, int nbBlocks) {
     fseek(f->file, sizeof(header) + (sizeof(block)*nbBlocks), SEEK_SET);
     fwrite(tab, sizeof(Index), length, f->file);
@@ -327,18 +377,6 @@ void createLOF(LOF_fileP f, char file_name[], int N) {
     StudentP StudentTab;  //*t est le tableau a remplire dés la lecture initial
     int k;
     blockP NewBuffer;
-    //cas ou N == 0
-    if (N == 0)
-    {
-        f =openLOF(f, file_name, 'n');
-        allocBlock(f, &k, &buffer);
-        writeHeader(f, 1, 1);
-        writeHeader(f, 2, 1);
-        writeHeader(f, 4, 0);
-        writeBlock(f, 1, buffer);
-        return;
-    }
-    
     StudentTab = scanTab(StudentTab, N); //scanner les N enregistrements
     quickSortTab(StudentTab, 0, N-1); //trier les N enregistrements selon la cle (QuickSort)
     
@@ -393,7 +431,6 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
     printHeader(f, file_name);
     blockP newBlock;
     f->tabIndex = InitTabIndex(f);
-    printf("deleted : %d\n",student->deleted);
 
     f = openLOF(f,file_name,'o');
 
@@ -411,7 +448,6 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
     
     
     if(j==-1){ // le cas ou on a depasse le dernier etudiant du dernier block
-        allocBlock(f, &x, &newBlock);
         studentCopy(newBlock->tab, student);
         newBlock->NB++; // ----------------
         n_block=readHeader(f,2);
@@ -432,9 +468,10 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
         }
         else{ 
             
-            printf("%d ----------------------",buffer->tab[FACT_B-1].matricule );
-            if(buffer->tab[FACT_B-1].matricule == 0){ // faire le daclage interblock (block isn't full)
+            
+            if(buffer->NB!=FACT_B){ // faire le daclage interblock (block isn't full)
                 int nbBlocks = buffer->NB;
+            
                 for(int p=nbBlocks; p>j; p--){
                     if(buffer->tab[p-1].deleted==1){
                         continue;
@@ -459,12 +496,8 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
 
             else{ // // faire le decalge (en 2 moitie)
                 allocBlock(f, &x, &newBlock);
-                int pair=0;
-                if(FACT_B %2 ==0) // dans le cas ou le facteur de blocage est pair ou impaire 
-                {
-                    pair=1;
-                }
-                int m=FACT_B/2 - pair; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+                int m=FACT_B/2 ; // la case du millieu de i em block ( le -1 cuz we start from 0 not 1)
+                
                 if (j<=m){ // si la case ou on vas inserer se trouve dans la premier moitie
                     newBlock->tab[0]=buffer->tab[m]; // mettre student de la case m dans la premiere case du nv block
                     newBlock->NB++;
@@ -475,7 +508,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
                         buffer->tab[p]= buffer->tab[p-1]; // decalage 
                     }
                     studentCopy((buffer->tab) + j, student);
-                        for(int p=1; p<=m+pair; p++){
+                        for(int p=1;p<=m;p++){
                             if(buffer->tab[p+m].deleted==1){
                                 continue;
                             }
@@ -492,7 +525,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
                     studentCopy((newBlock->tab) + indexnv, student); // mettre le nv student dans la nv block direct
                     newBlock->NB++;
                     int p2=m+1;
-                    for(int p=0;p<=m+pair;p++){
+                    for(int p=0;p<=m;p++){
                         if(p==indexnv ){ // passer a la prochaine case cuz we have already put our new student here
                             continue;
                         }
@@ -517,14 +550,14 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student) {
             writeHeader(f,4,readHeader(f,4)+1);// ====  nmbr de students
         }
     }
-    f->tabIndex = InitTabIndex(f);
+    
     closeLOF(f);
 }//insertion d'un novelle enregistrement dans le fichier
 
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB){
     f = openLOF(f,file_name,'o');
     f->tabIndex = InitTabIndex(f);
-    blockP nextBlock;
+
         int i=0;
         int numbBlock = readHeader(f, 1);
         *BlockNB = numbBlock;
@@ -535,8 +568,7 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
             if(buffer->svt != -1){
                 while (i<FACT_B)
                 {
-                    if(buffer->tab[i].matricule<matricule ) //  && buffer->tab[i].matricule!=0
-                    {
+                    if(buffer->tab[i].matricule<matricule){
                         i++;
                     }
                     else
@@ -544,42 +576,13 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
                         break;
                     }
                 }
-                if(i<FACT_B ){ // dans le cas ou la case est supprime mais existe encore dans les prochaines cases un matricule < matrcule a insere
-                    nextBlock=malloc(sizeof(block));
-                    readBlock(f,buffer->svt, nextBlock);
-                    if(nextBlock->tab[0].matricule>matricule){
-
-                        while (i<FACT_B && buffer->tab[i].deleted && buffer->tab[i].matricule<matricule && buffer->tab[i].matricule != 0)
-                        {
-                            i++;
-                        }
-                        if(i<FACT_B){
-                            *BlockNB = numbBlock;
-                            *PositionNB = i;
-                            return;
-                        }
-                        else{
-                            goto nextBloc;
-                        }
-                    }
-                    
-                    
+                if(i<FACT_B){ 
+                    *BlockNB = numbBlock;
+                    *PositionNB = i;
+                    return;
                 }else{
-                    if(buffer->tab[FACT_B-1].deleted){
-                        nextBloc:
-
-                        nextBlock=malloc(sizeof(block));
-                        readBlock(f,buffer->svt, nextBlock);
-                        if(nextBlock->tab[0].matricule>matricule && buffer->tab[FACT_B-1].deleted){
-                            *BlockNB = numbBlock;
-                            *PositionNB = FACT_B-1;
-                            return;
-                        }
-                    }
-                    else{
-                        *BlockNB = numbBlock+1;
-                        *PositionNB = 0;
-                    }
+                    *BlockNB = numbBlock+1;
+                    *PositionNB = 0;
 
                 }
             }
@@ -603,7 +606,9 @@ void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* 
             numbBlock = buffer->svt;
 
         }
-
+ 
+        
+        
     closeLOF(f);  // close the file
 }
 
@@ -749,3 +754,4 @@ void ModifyStudent(LOF_fileP f, char file_name[] , StudentP student) {
     }
     closeLOF(f);  // close the file
 }   //modifier le contenue de l'enregistrement s'il existe
+

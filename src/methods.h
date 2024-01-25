@@ -97,8 +97,7 @@ void insertStudent(LOF_fileP f, char file_name[], StudentP student);  //insertio
 void SearchInsertionPosition(LOF_fileP f, char file_name[], int matricule, int* BlockNB, int* PositionNB);// la recherche de la position ideale pour l'insertion
 void DeleteStudent(LOF_fileP f, char file_name[], int matricule); //suppression de l'enregistrement si il existe
 void SearchStudent(LOF_fileP f, char file_name[], int matricule, int* blockNB, int* positionNB, int* exist);  //retourne le bloc, position de l'enregistrement s'il est trouve
-void ModifyStudent(LOF_fileP f, char file_name[] , StudentP student);   //modifier le contenue de l'enregistrement s'il existe
-
+void ModifyStudent(LOF_fileP f, char file_name[] , StudentP student);  //modifier le contenue de l'enregistrement s'il existe
 
 
 #endif

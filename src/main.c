@@ -68,57 +68,78 @@ int main(int argc, char *argv[])
                     printf("\n4- Modify a student");
                     printf("\n5- Return to MAIN MENU <--");
                     printf("\n\nWhat option do you choose : ");
-                    scanf("%d", &option);
-                    switch (option)
-                    {
-                    case 1:
-                            
-                            fichierLOF = openLOF(fichierLOF, ch1, 'o');
-                            student = malloc(sizeof(Student)); 
-                            printf("create student\n");
-                            createStudent(student);
-                            insertStudent(fichierLOF, ch1, student);
-                            extractLOF(fichierLOF, ch1, ch2);
-                            printHeader(fichierLOF, ch1);
-                            
-                        goto edit_menu;
-                    case 2:
-                            printf("\nEntrez le matricule de l'etudiant a supprimer : ");
-                            scanf("%d",&n);
-                            DeleteStudent(fichierLOF, ch1, n);
-                            extractLOF(fichierLOF, ch1, ch2);
-                        goto edit_menu;
-                    case 3:
-                        
-                        do
-                        {
-                            printf("Entrez le matricule de l'etudiant que vous cherchez : ");
-                            scanf("%d",&n);
-                            SearchStudent(fichierLOF, ch1, n, &blockNB, &posNB, &existe);
-                            if (existe == 1){
-                                printf("\nETUDIANT TROUVE :\nBlockID : %d\nPosition : %d\n", blockNB, posNB);
-                                break;}
-                            else{
-                                printf("\nCETTE ETUDIANT N'EXISTE PAS\n");
-                                printf("Vous vous etes trompes? (o/n): ");
-                                scanf(" %c",&trompe);
-                                }
-                        } while (trompe == 'o' || trompe == 'O');
-                    
-                        goto edit_menu;
-                    case 4:
 
-                        goto edit_menu;
-                    
-                    case 5:
-                        goto main_menu;
-                        break;
-                    
-                    default:
-                        printf("\nYOU CHOOSED A WRONG OPTION !\n");
+                    if(scanf("%d", &option) == 1){
+                        switch (option)
+                        {
+                        case 1:
+                                
+                                fichierLOF = openLOF(fichierLOF, ch1, 'o');
+                                student = malloc(sizeof(Student)); 
+                                printf("create student\n");
+                                createStudent(student);
+                                // while (student->matricule != )
+                                // {
+                                //     /* code */
+                                // }
+                                
+                                insertStudent(fichierLOF, ch1, student);
+                                extractLOF(fichierLOF, ch1, ch2);
+                                printHeader(fichierLOF, ch1);
+                                
+                            goto edit_menu;
+                        case 2:
+                                printf("\nEntrez le matricule de l'etudiant a supprimer : ");
+                                scanf("%d",&n);
+                                DeleteStudent(fichierLOF, ch1, n);
+                                extractLOF(fichierLOF, ch1, ch2);
+
+                                printHeader(fichierLOF, ch1);
+                            goto edit_menu;
+                        case 3:
+                            
+                            do
+                            {
+                                printf("Entrez le matricule de l'etudiant que vous cherchez : ");
+                                scanf("%d",&n);
+                                
+                                
+                                SearchStudent(fichierLOF, ch1, n, &blockNB, &posNB, &existe);
+                                if (existe == 1){
+                                    printf("\nETUDIANT TROUVE :\nBlockID : %d\nPosition : %d\n", blockNB, posNB);
+                                    break;}
+                                else{
+                                    printf("\nCETTE ETUDIANT N'EXISTE PAS\n");
+                                    printf("Vous vous etes trompes? (o/n): ");
+                                    scanf(" %c",&trompe);
+                                    }
+                            } while (trompe == 'o' || trompe == 'O');
+
+                            goto edit_menu;
+
+                        case 4:
+                            student = malloc(sizeof(Student)); 
+                            printf("edit student\n");
+                            createStudent(student);
+
+                            ModifyStudent(fichierLOF,ch1,student);
+                            extractLOF(fichierLOF, ch1, ch2);
+
+                            goto edit_menu;
+                        
+                        case 5:
+                            goto main_menu;
+                        
+                        default:
+                            printf("\nYOU CHOOSED A WRONG OPTION !\n");
+                            goto edit_menu;
+                        }
+                    }
+                    else{
+                        printf("please enter a valid number!\n");
+                        while((getchar() != '\n'));
                         goto edit_menu;
                     }
-                    break;
                 case 3:
                     stop = 1;
                     break;
@@ -137,4 +158,6 @@ int main(int argc, char *argv[])
     closeLOF(fichierLOF);
     return 0;
 
+
 }
+
