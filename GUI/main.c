@@ -272,6 +272,8 @@ int main()
     float messageTimer = 0.0f;
     int exist;
     int blockNB, positionNB;
+    char ch1[20], ch2[20];
+    bool drawFile = false;
 
     //------------ DrawStudent test -----------
     // StudentP student1 = malloc(sizeof(Student));
@@ -280,15 +282,17 @@ int main()
     // student1->matricule = 123;
 
     //------------ DrawBlock test ------------
-    // blockP block = malloc(sizeof(block));
-    // createBlock(block);
+    // blockP block1 = malloc(sizeof(block));
+    // createBlock(block1);
+    // blockP block2 = malloc(sizeof(block));
+    // createBlock(block2);
 
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    Vector2 position = {0, 750};      // Position actuelle du rectangle
-    Vector2 destination = {screenWidth - 100, 750};   // Destination du rectangle
+    // Vector2 position = {0, 750};      // Position actuelle du rectangle
+    // Vector2 destination = {screenWidth - 100, 750};   // Destination du rectangle
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -297,7 +301,7 @@ int main()
         //----------------------------------------------------------------------------------
         // TODO: Implement required update logic
         //----------------------------------------------------------------------------------
-        MoveObject(&position, &destination, 0.7f);
+        // MoveObject(&position, &destination, 0.7f);
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -306,15 +310,15 @@ int main()
             ClearBackground((Color){0, 0,40, 0});
 
             //Testing moving elements :
-            DrawRectangleV(position, (Vector2){100, 150}, DARKBROWN);
-            DrawText(TextFormat("%d", 16), position.x + 40, position.y, 20, WHITE);
-            DrawLine(position.x, position.y + 20, position.x + 100, position.y + 20, WHITE);
-            DrawText("38", position.x + 40, position.y + 25, 20, WHITE);
-            DrawLine(position.x, position.y + 50, position.x + 100, position.y + 50, WHITE);
-            DrawText("66", position.x + 40, position.y + 50, 20, WHITE);
-            DrawLine(position.x, position.y + 70, position.x + 100, position.y + 70, WHITE);
-            DrawText("80", position.x + 40, position.y + 75, 20, WHITE);
-            DrawLine(position.x, position.y + 100, position.x + 100, position.y + 100, WHITE);
+            // DrawRectangleV(position, (Vector2){100, 150}, DARKBROWN);
+            // DrawText(TextFormat("%d", 16), position.x + 40, position.y, 20, WHITE);
+            // DrawLine(position.x, position.y + 20, position.x + 100, position.y + 20, WHITE);
+            // DrawText("38", position.x + 40, position.y + 25, 20, WHITE);
+            // DrawLine(position.x, position.y + 50, position.x + 100, position.y + 50, WHITE);
+            // DrawText("66", position.x + 40, position.y + 50, 20, WHITE);
+            // DrawLine(position.x, position.y + 70, position.x + 100, position.y + 70, WHITE);
+            // DrawText("80", position.x + 40, position.y + 75, 20, WHITE);
+            // DrawLine(position.x, position.y + 100, position.x + 100, position.y + 100, WHITE);
             
             //----------------- SUCCESS AND FAIL MESSAGES -------------------
             if (successSearchMessage)
@@ -346,10 +350,15 @@ int main()
             // DrawStudent(student1, 50, 800);
 
             // //--------------- TEST DRAW BLOCK ------------
-            // DrawBlock(block, 50, 700);
+            // DrawBlock(block1, 50, 700);
+            // DrawBlock(block2, 400, 700);
 
             //--------------- TEST DRAW FILE ------------
-            // DrawLOF(fichierLOF, "adel.bin", 50, 700);
+            if (drawFile)
+            {
+                DrawLOF(fichierLOF, ch1, 50, 700);
+            }
+            
             
             
             
@@ -495,7 +504,6 @@ int main()
                     } else {
                         StudentP student = AddWindowButton(AddNameTextBoxText, AddSurnameTextBoxText, atoi(AddKeyTextBoxText));
                         studentCopy(studentTab + creationCounter, student);
-                        char ch1[20], ch2[20];
                         strcpy(ch1, FileNameTextBoxText);
                         strcpy(ch2, FileNameTextBoxText);
                         strcat(ch1, ".bin");
@@ -507,6 +515,7 @@ int main()
                         AddWindowBoxActive = false;
                         createLOF(fichierLOF, ch1, studentTab, NbStudentsSpinnerValue);
                         extractLOF(fichierLOF, ch1, ch2);
+                        drawFile = true;
                     }
                 }
             }
