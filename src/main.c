@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
                     printf("\n4- Modify a student");
                     printf("\n5- Return to MAIN MENU <--");
                     printf("\n\nWhat option do you choose : ");
+
                     if(scanf("%d", &option) == 1){
                         switch (option)
                         {
@@ -157,4 +158,6 @@ int main(int argc, char *argv[])
     closeLOF(fichierLOF);
     return 0;
 
+
 }
+

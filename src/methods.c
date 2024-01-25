@@ -1,3 +1,4 @@
+
 #include "methods.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -753,3 +754,4 @@ void ModifyStudent(LOF_fileP f, char file_name[] , StudentP student) {
     }
     closeLOF(f);  // close the file
 }   //modifier le contenue de l'enregistrement s'il existe
+
