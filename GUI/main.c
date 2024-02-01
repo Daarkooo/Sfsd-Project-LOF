@@ -34,9 +34,9 @@ static void ModifyButton(char* ch, char* name, char* surname, int matricule);   
 
 //------------------------------ VISUALISATION FUNCTIONS ---------------------------
 void MoveObject(Vector2 *position, Vector2 *destination, float speed);
-void DrawStudent(StudentP student, int posX, int posY);
-void DrawBlock(blockP block, int posX, int posY);
-void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY);
+void DrawStudent(StudentP student, int posX, int posY, Font VisuContentFont);
+void DrawBlock(blockP block, int posX, int posY, Font VisuContentFont);
+void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY, Font VisuContentFont);
 
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -256,10 +256,10 @@ int main()
     Font EmizenFontBig = LoadFontEx("./fonts/Emizen.ttf", 70, 0, 0);
     Font EmizenFontSmall = LoadFontEx("./fonts/Emizen.ttf", 48, 0, 0);
     Font ButtonFont = LoadFontEx("./fonts/Satoshi-Black.otf", 20, 0, 0);
-    Font WindowTitleFont = LoadFontEx("./fonts/Hoover-Bold.otf", 35, 0, 0);
-    Font WindowButtonFont = LoadFontEx("./fonts/Nippo-Medium.otf", 20, 0, 0);
-    Font SuccesMessageFont = LoadFontEx("./fonts/Tanker-Regular.otf", 50, 0, 0);
-    Font VisuContentFont = LoadFontEx("./fonts/CourierPrime-Regular.ttf", 20, 0, 0);
+    Font WindowTitleFont = LoadFontEx("./fonts/Poppins-ExtraBold.ttf", 35, 0, 0);
+    Font WindowButtonFont = LoadFontEx("./fonts/Inter-SemiBold.ttf", 20, 0, 0);
+    Font SuccesMessageFont = LoadFontEx("./fonts/Poppins-Medium.ttf", 50, 0, 0);
+    Font VisuContentFont = LoadFontEx("./fonts/Inter-Medium.ttf", 18, 0, 0);
     
 
 
@@ -354,7 +354,7 @@ int main()
             //--------------- DRAW FILE ------------
             if (drawFile)
             {
-                DrawLOF(fichierLOF, ch1, 50, 700);
+                DrawLOF(fichierLOF, ch1, 50, 700, VisuContentFont);
             }
             //-------------- END DRAW FILE -----------
             
@@ -748,8 +748,7 @@ void MoveObject(Vector2 *position, Vector2 *destination, float speed) {
     position->y += (destination->y - position->y) * t * speed;
 }
 
-void DrawStudent(StudentP student, int posX, int posY) {
-    Font VisuContentFont = LoadFontEx("./fonts/CourierPrime-Regular.ttf", 18, 0, 0);
+void DrawStudent(StudentP student, int posX, int posY, Font VisuContentFont) {
     DrawRectangle(posX, posY, 280, 40, BLUE);
     DrawTextEx(VisuContentFont, student->name, (Vector2){posX + 3, posY + 10}, VisuContentFont.baseSize, 0, WHITE);
     DrawLine(posX + 110, posY, posX + 110, posY + 40, WHITE);
@@ -760,7 +759,7 @@ void DrawStudent(StudentP student, int posX, int posY) {
     DrawTextEx(VisuContentFont, matricule, (Vector2){posX + 223, posY + 10}, VisuContentFont.baseSize, 0, WHITE);
 }
 
-void DrawBlock(blockP block, int posX, int posY) {
+void DrawBlock(blockP block, int posX, int posY, Font VisuContentFont) {
     DrawRectangleRounded((Rectangle){posX, posY, 300, 20 + FACT_B*40}, 0.1, 0, DARKBLUE);
     int i = 0;
     int j = 0;
@@ -768,7 +767,7 @@ void DrawBlock(blockP block, int posX, int posY) {
     {
         if (block->tab[i].deleted == 0)
         {
-            DrawStudent(block->tab + i, posX + 10, 10 + posY + j*40);
+            DrawStudent(block->tab + i, posX + 10, 10 + posY + j*40, VisuContentFont);
             DrawLine(posX + 10, 10 + posY + j*40, posX + 10 + 280, 10 + posY + j*40, WHITE);
             j++;
         }
@@ -779,7 +778,7 @@ void DrawBlock(blockP block, int posX, int posY) {
     DrawLine(posX + 10, 10 + posY, posX + 10, 10 + posY + j*40, WHITE);
 }
 
-void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY) {
+void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY, Font VisuContentFont) {
     f = openLOF(f, file_name, 'o');
     int k = readHeader(f, 1);
     int i = 0;
@@ -789,12 +788,12 @@ void DrawLOF(LOF_fileP f, char* file_name, int posX, int posY) {
         readBlock(f, k, buffer);
         if (buffer->svt != -1)
         {
-            DrawBlock(buffer, posX + i*350, posY);
+            DrawBlock(buffer, posX + i*350, posY, VisuContentFont);
             DrawLine(300 + posX + i*350, (20 + FACT_B*40)/2 + posY, 350 + posX + i*350, (20 + FACT_B*40)/2 + posY, WHITE);
             DrawTriangle((Vector2){340 + posX + i*350, (20 + FACT_B*40)/2 + posY - 10}, (Vector2){340 + posX + i*350, (20 + FACT_B*40)/2 + posY + 10}, (Vector2){350 + posX + i*350, (20 + FACT_B*40)/2 + posY}, WHITE);
         }
         else {
-            DrawBlock(buffer, posX + i*350, posY);
+            DrawBlock(buffer, posX + i*350, posY, VisuContentFont);
         }
         i++;
         k = buffer->svt;

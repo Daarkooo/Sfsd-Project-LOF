@@ -1,24 +1,17 @@
 
 	----------BLOCK 1----------
 Student 1:
-	NOM : 
-	PRENOM : 
-	MATRICULE (cle) : 23
+	NOM : HADJ ARAB
+	PRENOM : Adel
+	MATRICULE (cle) : 31
 Student 2:
 	NOM : 
 	PRENOM : 
-	MATRICULE (cle) : 34
+	MATRICULE (cle) : 231
 Student 3:
 	NOM : 
 	PRENOM : 
-	MATRICULE (cle) : 43
-
-	----------BLOCK 2----------
-Student 1:
-	NOM : 
-	PRENOM : 
-	MATRICULE (cle) : 543
+	MATRICULE (cle) : 342
 
 ------------- INDEX ARRAY CONTENT -----------
-0 - blockID 1 - lastKey -2016355072
-1 - blockID 2 - lastKey 543
+0 - blockID 1 - lastKey 342
