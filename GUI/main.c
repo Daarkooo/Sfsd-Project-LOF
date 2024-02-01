@@ -270,10 +270,13 @@ int main()
     bool successSearchMessage = false;
     bool failSearchMessage = false;
     float messageTimer = 0.0f;
-    int exist;
+    int exist = 0;
     int blockNB, positionNB;
     char ch1[20], ch2[20];
     bool drawFile = false;
+    bool drawSearchRectangle = false;
+    Vector2 searchPos = { 100, 800 };
+    float searchTime = 0.0f;
 
     //------------ DrawStudent test -----------
     // StudentP student1 = malloc(sizeof(Student));
@@ -346,19 +349,42 @@ int main()
             }
             //---------------------- END SUCCESS AND FAIL MESSAGES -----------------------
 
-            //-------------- TEST DRAW STUDENT -------------
-            // DrawStudent(student1, 50, 800);
+            
 
-            // //--------------- TEST DRAW BLOCK ------------
-            // DrawBlock(block1, 50, 700);
-            // DrawBlock(block2, 400, 700);
-
-            //--------------- TEST DRAW FILE ------------
+            //--------------- DRAW FILE ------------
             if (drawFile)
             {
                 DrawLOF(fichierLOF, ch1, 50, 700);
             }
+            //-------------- END DRAW FILE -----------
             
+
+            //----------- TEST MOVING SEARCH RECTANGLE ------------
+            if (drawSearchRectangle)
+            {
+                searchTime -= 0.03f;
+                if (exist == 0)
+                {
+                    DrawRectangle(searchPos.x, searchPos.y, 200, 50, ORANGE); 
+                }
+                if (exist == 1)
+                {
+                    DrawRectangle(searchPos.x, searchPos.y, 200, 50, GREEN);
+                }
+                if (searchTime <= 0.0f)
+                {
+                    searchPos.x  += 50;
+                    searchTime = 3.0f;
+                    if (exist == 1)
+                    {
+                        drawSearchRectangle = false;
+                    }
+                    
+                }
+            }
+            
+            
+
             
             
             DrawTextEx(EmizenFontBig, "MAIN MENU", (Vector2){90, 30}, EmizenFontBig.baseSize, 3, WHITE);
@@ -533,7 +559,10 @@ int main()
                         failSearchMessage = true;
                         messageTimer = 5.0f;
                     }
-                    
+
+                    searchTime = 3.0f;
+                    drawSearchRectangle = true;
+
                     SearchWindowBoxActive = false;
                     EditWindowActive = true;
                     SearchWindowValueBoxValue = 0;
@@ -672,7 +701,6 @@ static int SearchWindowButton(char* ch, int matricule, int* blockNB, int* positi
     strcat(ch1, ".bin");
     SearchStudent(fichierLOF, ch1, matricule, blockNB, positionNB, &exist);
     return exist;
-    
 }
 
 //----------------------- DELETE WINDOW BUTTONS -----------------------------

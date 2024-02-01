@@ -1,0 +1,24 @@
+
+	----------BLOCK 1----------
+Student 1:
+	NOM : 
+	PRENOM : 
+	MATRICULE (cle) : 23
+Student 2:
+	NOM : 
+	PRENOM : 
+	MATRICULE (cle) : 34
+Student 3:
+	NOM : 
+	PRENOM : 
+	MATRICULE (cle) : 43
+
+	----------BLOCK 2----------
+Student 1:
+	NOM : 
+	PRENOM : 
+	MATRICULE (cle) : 543
+
+------------- INDEX ARRAY CONTENT -----------
+0 - blockID 1 - lastKey -2016355072
+1 - blockID 2 - lastKey 543
