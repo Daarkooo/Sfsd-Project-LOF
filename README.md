@@ -17,10 +17,10 @@ The LOF-File-Project implements the LOF (Liste Ordonnee Fixe) access method, whi
 
 check the video in the videos folder
 
-Developed by a dedicated team:
+## Contributors
 
-- HADJ ARAB Adel
-- HIRECHE Hichem
-- ROUCHAI Wafi
+- [Adel2411](https://github.com/Adel2411)
+- [Daarkooo](https://github.com/Daarkooo)
+- [meedwafi](https://github.com/meedwafi)
 
 This project is ideal for developers looking for a robust solution to manage ordered lists within files, leveraging the power and performance of C, complemented by an intuitive GUI.
